@@ -1,0 +1,2439 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="description" content="Simuladores educacionais de Renda Fixa (Brasil e EUA) e CFD — ferramentas analíticas para aprendizado financeiro.">
+  <title>Capital Finance | Educação CFD & Renda Fixa</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0b0e11;
+      --bg-secondary: #12161c;
+      --bg-card: #161a1e;
+      --bg-card-hover: #1a1f26;
+      --bg-input: #0d1117;
+      --bg-table-head: #1e2329;
+      --bg-table-row: #161a1e;
+      --bg-table-row-alt: #12161c;
+      --border: #2b3139;
+      --border-focus: #f0b90b;
+      --text-primary: #eaecef;
+      --text-secondary: #848e9c;
+      --text-muted: #5e6673;
+      --accent: #f0b90b;
+      --accent-hover: #fcd535;
+      --accent-dim: rgba(240, 185, 11, 0.12);
+      --green: #0ecb81;
+      --green-dim: rgba(14, 203, 129, 0.12);
+      --red: #f6465d;
+      --red-dim: rgba(246, 70, 93, 0.12);
+      --blue: #3861fb;
+      --blue-dim: rgba(56, 97, 251, 0.12);
+      --radius: 12px;
+      --radius-sm: 8px;
+      --transition: 0.2s ease;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 50% at 50% -20%, rgba(240, 185, 11, 0.06), transparent),
+        radial-gradient(ellipse 60% 40% at 100% 100%, rgba(56, 97, 251, 0.04), transparent);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .app {
+      position: relative;
+      z-index: 1;
+      max-width: 1024px;
+      margin: 0 auto;
+      padding: 20px 16px 40px;
+    }
+
+    .header { text-align: center; margin-bottom: 28px; padding-top: 8px; }
+
+    .header-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--accent-dim);
+      color: var(--accent);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 5px 12px;
+      border-radius: 20px;
+      margin-bottom: 14px;
+    }
+
+    .header-badge::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      background: var(--accent);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .header h1 {
+      font-size: clamp(1.5rem, 4vw, 2rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+    }
+
+    .header h1 span { color: var(--accent); }
+
+    .header p {
+      color: var(--text-secondary);
+      font-size: 14px;
+      max-width: 560px;
+      margin: 0 auto;
+    }
+
+    .disclaimer {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: var(--radius-sm);
+      padding: 12px 16px;
+      margin-bottom: 24px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    .disclaimer strong { color: var(--text-primary); }
+
+    .tabs {
+      display: flex;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 4px;
+      margin-bottom: 24px;
+      gap: 4px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 12px 16px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .tab-btn svg { width: 18px; height: 18px; flex-shrink: 0; }
+    .tab-btn:hover { color: var(--text-primary); background: var(--bg-card); }
+    .tab-btn.active { background: var(--accent); color: #0b0e11; }
+    .tab-btn.active svg { stroke: #0b0e11; }
+
+    .panel { display: none; animation: fadeIn 0.3s ease; }
+    .panel.active { display: block; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .card-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-title .flag { font-size: 18px; }
+
+    /* Seletor interno de mercado (Renda Fixa) */
+    .market-switch {
+      display: flex;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 4px;
+      gap: 4px;
+      margin-bottom: 20px;
+    }
+
+    .market-btn {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 13px 16px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .market-btn:hover { color: var(--text-primary); background: var(--bg-card); }
+
+    .market-btn.active.br {
+      background: var(--green-dim);
+      border: 1px solid var(--green);
+      color: var(--green);
+    }
+
+    .market-btn.active.us {
+      background: var(--blue-dim);
+      border: 1px solid var(--blue);
+      color: var(--blue);
+    }
+
+    .market-panel { display: none; animation: fadeIn 0.25s ease; }
+    .market-panel.active { display: block; }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    @media (max-width: 560px) {
+      .form-grid { grid-template-columns: 1fr; }
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group.full { grid-column: 1 / -1; }
+
+    label {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+
+    .input-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-prefix,
+    .input-suffix {
+      position: absolute;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-muted);
+      pointer-events: none;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .input-prefix { left: 12px; }
+    .input-suffix { right: 12px; }
+
+    input, select, textarea {
+      width: 100%;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-size: 14px;
+      padding: 11px 12px;
+      transition: var(--transition);
+      outline: none;
+    }
+
+    input, textarea {
+      font-family: 'JetBrains Mono', monospace;
+      -moz-appearance: textfield;
+    }
+
+    input.has-prefix { padding-left: 36px; }
+    input.has-suffix { padding-right: 36px; }
+
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px var(--accent-dim);
+    }
+
+    input.readonly-field {
+      background: #1a1f26;
+      color: var(--text-secondary);
+      cursor: not-allowed;
+      border-color: var(--border);
+      opacity: 0.92;
+    }
+
+    input.readonly-field:focus {
+      border-color: var(--border);
+      box-shadow: none;
+    }
+
+    input:disabled {
+      background: #1a1f26;
+      color: var(--text-secondary);
+      cursor: not-allowed;
+      border-color: var(--border);
+      opacity: 0.92;
+    }
+
+    input:disabled:focus {
+      border-color: var(--border);
+      box-shadow: none;
+    }
+
+    .volume-contract-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 14px;
+      grid-column: 1 / -1;
+    }
+
+    @media (max-width: 768px) {
+      .volume-contract-row { grid-template-columns: 1fr; }
+    }
+
+    .volume-contract-row .form-group {
+      min-width: 0;
+    }
+
+    select { cursor: pointer; font-family: 'Inter', sans-serif; }
+    select option { background: var(--bg-card); }
+
+    textarea {
+      font-family: 'Inter', sans-serif;
+      resize: vertical;
+      min-height: 60px;
+    }
+
+    .field-hint {
+      font-size: 11px;
+      color: var(--text-muted);
+      line-height: 1.5;
+      margin-top: 10px;
+    }
+
+    .bond-yield-badge {
+      display: inline-flex;
+      align-items: center;
+      background: var(--blue-dim);
+      color: var(--blue);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 8px 12px;
+      border-radius: var(--radius-sm);
+      margin-top: 4px;
+    }
+
+    .results {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .result-item {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+      text-align: center;
+    }
+
+    .result-item.highlight {
+      border-color: var(--accent);
+      background: var(--accent-dim);
+    }
+
+    .result-item.positive {
+      border-color: var(--green);
+      background: var(--green-dim);
+    }
+
+    .result-item.negative {
+      border-color: var(--red);
+      background: var(--red-dim);
+    }
+
+    .result-item.fx-usd {
+      border-color: var(--blue);
+      background: var(--blue-dim);
+      grid-column: span 1;
+    }
+
+    .result-item.fx-brl {
+      border-color: var(--accent);
+      background: var(--accent-dim);
+      grid-column: span 1;
+    }
+
+    .result-item.fx-usd .result-value { color: var(--blue); }
+    .result-item.fx-brl .result-value { color: var(--accent); }
+
+    .fx-spotlight {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    @media (max-width: 560px) {
+      .fx-spotlight { grid-template-columns: 1fr; }
+    }
+
+    .fx-spotlight .result-item {
+      padding: 18px 14px;
+    }
+
+    .fx-spotlight .result-value {
+      font-size: 17px;
+    }
+
+    .us-flow-section {
+      margin-top: 18px;
+      padding-top: 4px;
+    }
+
+    .us-flow-section + .us-flow-section {
+      margin-top: 22px;
+      padding-top: 18px;
+      border-top: 1px solid var(--border);
+    }
+
+    .us-flow-title {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      margin-bottom: 12px;
+    }
+
+    .us-flow-title.usd { color: var(--blue); }
+    .us-flow-title.brl { color: var(--accent); }
+
+    .us-flow-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    @media (max-width: 768px) {
+      .us-flow-grid { grid-template-columns: 1fr; }
+    }
+
+    .us-flow-grid .result-item.fx-usd {
+      grid-column: span 1;
+    }
+
+    .us-cambial-note {
+      margin-bottom: 12px;
+    }
+
+    .us-cambial-note .result-item {
+      padding: 14px;
+    }
+
+    .result-label {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 4px;
+    }
+
+    .result-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-primary);
+      word-break: break-all;
+    }
+
+    .result-item.highlight .result-value { color: var(--accent); }
+    .result-item.positive .result-value { color: var(--green); }
+    .result-item.negative .result-value { color: var(--red); }
+
+    .result-sub {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-top: 4px;
+      line-height: 1.4;
+    }
+
+    .direction-toggle { display: flex; gap: 8px; }
+
+    .direction-btn {
+      flex: 1;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-secondary);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 12px;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .direction-btn:hover { border-color: var(--text-muted); }
+
+    .direction-btn.active.long {
+      background: var(--green-dim);
+      border-color: var(--green);
+      color: var(--green);
+    }
+
+    .direction-btn.active.short {
+      background: var(--red-dim);
+      border-color: var(--red);
+      color: var(--red);
+    }
+
+    .leverage-display {
+      text-align: center;
+      padding: 10px;
+      background: var(--bg-input);
+      border: 1px dashed var(--border);
+      border-radius: var(--radius-sm);
+      margin-top: 4px;
+    }
+
+    .leverage-display span {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .leverage-display.super-lev span {
+      color: var(--red);
+    }
+
+    .rr-spotlight {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    @media (max-width: 720px) {
+      .rr-spotlight { grid-template-columns: 1fr; }
+    }
+
+    .rr-spotlight .result-item { padding: 16px 14px; }
+
+    .result-item.rr-ratio {
+      border-color: var(--accent);
+      background: var(--accent-dim);
+    }
+
+    .result-item.rr-ratio .result-value {
+      color: var(--accent);
+      font-size: 17px;
+    }
+
+    .result-item.risk-item.negative { border-color: var(--red); background: var(--red-dim); }
+    .result-item.reward-item.positive { border-color: var(--green); background: var(--green-dim); }
+
+    .result-item.pip-value {
+      border-color: var(--blue);
+      background: var(--blue-dim);
+    }
+
+    .result-item.pip-value .result-value { color: var(--blue); }
+
+    .leverage-metrics {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    @media (max-width: 720px) {
+      .leverage-metrics { grid-template-columns: 1fr; }
+    }
+
+    .cfd-summary-card {
+      border-color: rgba(240, 185, 11, 0.2);
+      background: linear-gradient(135deg, var(--bg-card) 0%, rgba(240, 185, 11, 0.03) 100%);
+    }
+
+    .cfd-summary-text {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      line-height: 1.7;
+      color: var(--text-secondary);
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 14px 16px;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .cfd-summary-text.short-mode {
+      border-left: 3px solid var(--red);
+    }
+
+    .cfd-summary-text.long-mode {
+      border-left: 3px solid var(--green);
+    }
+
+    select optgroup {
+      font-weight: 700;
+      color: var(--text-secondary);
+      background: var(--bg-card);
+    }
+
+    .history-section {
+      margin-top: 32px;
+      padding-top: 28px;
+      border-top: 1px solid var(--border);
+    }
+
+    .history-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .history-header-text h2 {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .history-header-text p {
+      font-size: 12px;
+      color: var(--text-secondary);
+      max-width: 480px;
+    }
+
+    .history-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .btn-save {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--accent);
+      color: #0b0e11;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 11px 18px;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .btn-save:hover {
+      background: var(--accent-hover);
+      transform: translateY(-1px);
+    }
+
+    .btn-save:active { transform: translateY(0); }
+
+    .btn-clear {
+      background: transparent;
+      color: var(--red);
+      border: 1px solid rgba(246, 70, 93, 0.35);
+      border-radius: var(--radius-sm);
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 10px 14px;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .btn-clear:hover {
+      background: var(--red-dim);
+      border-color: var(--red);
+    }
+
+    .note-field-wrap { margin-bottom: 16px; }
+
+    .save-toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--green);
+      color: #0b0e11;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 10px 20px;
+      border-radius: 20px;
+      opacity: 0;
+      transition: transform 0.3s ease, opacity 0.3s ease;
+      z-index: 100;
+      pointer-events: none;
+    }
+
+    .save-toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--bg-card);
+    }
+
+    .spreadsheet {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      min-width: 720px;
+    }
+
+    .spreadsheet thead {
+      background: var(--bg-table-head);
+      position: sticky;
+      top: 0;
+      z-index: 2;
+    }
+
+    .spreadsheet th {
+      padding: 11px 12px;
+      text-align: left;
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-bottom: 2px solid var(--border);
+      white-space: nowrap;
+    }
+
+    .spreadsheet td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-primary);
+      vertical-align: middle;
+    }
+
+    .spreadsheet tbody tr:nth-child(even) { background: var(--bg-table-row-alt); }
+    .spreadsheet tbody tr:nth-child(odd) { background: var(--bg-table-row); }
+    .spreadsheet tbody tr:hover { background: var(--bg-card-hover); }
+
+    .spreadsheet .cell-mono {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+    }
+
+    .spreadsheet .cell-positive { color: var(--green); }
+    .spreadsheet .cell-negative { color: var(--red); }
+
+    .spreadsheet .cell-note {
+      font-size: 11px;
+      color: var(--text-secondary);
+      max-width: 160px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .spreadsheet .cell-date {
+      font-size: 11px;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .btn-row-delete {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 4px 6px;
+      border-radius: 4px;
+      font-size: 14px;
+      line-height: 1;
+      transition: var(--transition);
+    }
+
+    .btn-row-delete:hover {
+      color: var(--red);
+      background: var(--red-dim);
+    }
+
+    .table-empty {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    .table-empty span {
+      display: block;
+      font-size: 28px;
+      margin-bottom: 8px;
+      opacity: 0.5;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 32px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <div class="header-badge">Ferramenta Analítica</div>
+      <h1>Capital <span>Finance</span></h1>
+      <p>Simule Renda Fixa por mercado (Brasil ou EUA) e opere cenários CFD. Plataforma educacional independente para análise e estudo.</p>
+    </header>
+
+    <div class="disclaimer">
+      <strong>Aviso:</strong> Esta ferramenta possui caráter exclusivamente educacional e informativo. Não constitui recomendação de investimento, consultoria financeira ou oferta de produtos. Resultados são simulações e podem divergir da realidade. Consulte um profissional qualificado antes de tomar decisões financeiras.
+    </div>
+
+    <nav class="tabs" role="tablist">
+      <button class="tab-btn active" data-tab="renda-fixa" role="tab" aria-selected="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        Renda Fixa
+      </button>
+      <button class="tab-btn" data-tab="cfd" role="tab" aria-selected="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+        CFD
+      </button>
+    </nav>
+
+    <!-- RENDA FIXA -->
+    <section id="panel-renda-fixa" class="panel active" role="tabpanel">
+      <div class="market-switch" role="tablist" aria-label="Seleção de mercado">
+        <button type="button" class="market-btn active br" data-market="br" role="tab" aria-selected="true">🇧🇷 Mercado Brasil</button>
+        <button type="button" class="market-btn us" data-market="us" role="tab" aria-selected="false">🇺🇸 Mercado EUA</button>
+      </div>
+
+      <!-- MERCADO BRASIL -->
+      <div id="market-panel-br" class="market-panel active" role="tabpanel">
+        <div class="card">
+          <div class="card-title"><span class="flag">🇧🇷</span> Simulação — Mercado Brasil</div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="br-valor">Valor Investido</label>
+              <div class="input-wrap">
+                <span class="input-prefix">R$</span>
+                <input type="number" id="br-valor" class="has-prefix" value="10000" min="0" step="100">
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="br-anos">Prazo (em anos)</label>
+              <div class="input-wrap">
+                <input type="number" id="br-anos" value="1" min="0.01" step="0.01">
+                <span class="input-suffix">anos</span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="br-indexador">Indexador / Título</label>
+              <select id="br-indexador">
+                <optgroup label="Pós-fixados">
+                  <option value="cdi">CDI</option>
+                  <option value="selic">Selic (Taxa Meta)</option>
+                </optgroup>
+                <optgroup label="Tesouro Direto — Títulos Públicos">
+                  <option value="Tesouro Prefixado 2037 (10 Anos)">Tesouro Prefixado 2037 (10 Anos)</option>
+                  <option value="Tesouro IPCA+ 2045 (20 Anos)">Tesouro IPCA+ 2045 (20 Anos)</option>
+                  <option value="Tesouro IPCA+ 2055 (30 Anos)">Tesouro IPCA+ 2055 (30 Anos)</option>
+                </optgroup>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="br-taxa" id="br-taxa-label">Percentual do CDI</label>
+              <div class="input-wrap">
+                <input type="number" id="br-taxa" value="100" min="0" step="0.01" placeholder="Taxa contratada">
+                <span class="input-suffix" id="br-taxa-suffix">%</span>
+              </div>
+            </div>
+          </div>
+          <p class="field-hint" id="br-taxa-hint">
+            Informe <strong>100</strong> para 100% do CDI e defina o prazo em anos. Taxa CDI de referência: <span id="br-cdi-ref">12,25</span>% a.a.
+            Juros compostos anuais. IR regressivo sobre o rendimento bruto.
+          </p>
+          <div class="results">
+            <div class="result-item">
+              <div class="result-label">Taxa Efetiva</div>
+              <div class="result-value" id="br-taxa-efetiva">—</div>
+            </div>
+            <div class="result-item">
+              <div class="result-label">Rendimento Bruto</div>
+              <div class="result-value" id="br-bruto">—</div>
+            </div>
+            <div class="result-item">
+              <div class="result-label">IR (<span id="br-aliquota">—</span>)</div>
+              <div class="result-value" id="br-ir">—</div>
+            </div>
+            <div class="result-item highlight">
+              <div class="result-label">Valor Líquido</div>
+              <div class="result-value" id="br-liquido">—</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MERCADO EUA -->
+      <div id="market-panel-us" class="market-panel" role="tabpanel">
+        <div class="card">
+          <div class="card-title"><span class="flag">🇺🇸</span> Simulação — Mercado EUA (Treasuries)</div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="us-valor">Valor Investido</label>
+              <div class="input-wrap">
+                <span class="input-prefix">R$</span>
+                <input type="number" id="us-valor" class="has-prefix" value="10000" min="0" step="100">
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="us-anos">Prazo (em anos)</label>
+              <div class="input-wrap">
+                <input type="number" id="us-anos" value="10" min="1" step="1" disabled class="readonly-field">
+                <span class="input-suffix">anos</span>
+              </div>
+            </div>
+            <div class="form-group full">
+              <label for="us-tbond">Título do Tesouro Americano</label>
+              <select id="us-tbond">
+                <option value="10">T-Bond 10 Anos</option>
+                <option value="20">T-Bond 20 Anos</option>
+                <option value="30">T-Bond 30 Anos</option>
+              </select>
+              <div class="bond-yield-badge" id="us-tbond-yield">Yield: 4,25% a.a. · Vencimento: 10 anos</div>
+            </div>
+            <div class="form-group">
+              <label for="us-cambio-entrada">Câmbio de Entrada</label>
+              <div class="input-wrap">
+                <span class="input-prefix">R$</span>
+                <input type="number" id="us-cambio-entrada" class="has-prefix" value="5.80" min="0.01" step="0.01">
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="us-cambio-saida">Câmbio de Saída Projetado</label>
+              <div class="input-wrap">
+                <span class="input-prefix">R$</span>
+                <input type="number" id="us-cambio-saida" class="has-prefix" value="6.20" min="0.01" step="0.01">
+              </div>
+            </div>
+          </div>
+          <p class="field-hint">
+            Fluxo linear: conversão BRL→USD na entrada, rendimento do T-Bond em dólares, conversão USD→BRL na saída.
+            IR de 15% sobre o lucro total em reais (ganho de capital).
+          </p>
+
+          <div class="us-flow-section">
+            <div class="us-flow-title usd">🇺🇸 Fluxo em Dólar (USD)</div>
+            <div class="us-flow-grid">
+              <div class="result-item fx-usd" id="us-investido-usd-container">
+                <div class="result-label">INVESTIDO (USD)</div>
+                <div class="result-value" id="us-investido-usd">—</div>
+                <div class="result-sub">Capital convertido na entrada (÷ câmbio entrada)</div>
+              </div>
+              <div class="result-item fx-usd" id="us-ganho-usd-container">
+                <div class="result-label">GANHO NOMINAL (USD)</div>
+                <div class="result-value" id="us-ganho-usd">—</div>
+                <div class="result-sub">Rendimento puro do T-Bond em dólares</div>
+              </div>
+              <div class="result-item fx-usd" id="us-final-usd-container">
+                <div class="result-label">VALOR FINAL (USD)</div>
+                <div class="result-value" id="us-final-usd">—</div>
+                <div class="result-sub">Investido + ganho nominal</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="us-flow-section">
+            <div class="us-flow-title brl">🇧🇷 Retorno em Real (BRL) · câmbio de saída</div>
+            <div class="us-cambial-note">
+              <div class="result-item fx-brl" id="us-ganho-cambial-container">
+                <div class="result-label">Ganho Cambial Extra (R$)</div>
+                <div class="result-value" id="us-ganho-cambial">—</div>
+                <div class="result-sub">Efeito USD/BRL: valor final × câmbio saída vs. câmbio entrada</div>
+              </div>
+            </div>
+            <div class="us-flow-grid">
+              <div class="result-item fx-brl" id="us-lucro-total-container">
+                <div class="result-label">LUCRO TOTAL (R$)</div>
+                <div class="result-value" id="us-lucro-total">—</div>
+                <div class="result-sub">Valor final (R$ saída) − investimento inicial</div>
+              </div>
+              <div class="result-item" id="us-ir-container">
+                <div class="result-label">IR GANHO CAPITAL</div>
+                <div class="result-value" id="us-ir">—</div>
+                <div class="result-sub">15% sobre o lucro total em reais</div>
+              </div>
+              <div class="result-item highlight" id="us-liquido-container">
+                <div class="result-label">VALOR LÍQUIDO (R$)</div>
+                <div class="result-value" id="us-liquido">—</div>
+                <div class="result-sub">Saldo final trazido de volta ao Brasil</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CFD -->
+    <section id="panel-cfd" class="panel" role="tabpanel">
+      <div class="card">
+        <div class="card-title">Configuração da Operação</div>
+        <div class="form-grid">
+          <div class="form-group full">
+            <label>Direção da Operação</label>
+            <div class="direction-toggle">
+              <button type="button" class="direction-btn active long" data-direction="long">▲ Compra (Long)</button>
+              <button type="button" class="direction-btn short" data-direction="short">▼ Venda (Short)</button>
+            </div>
+          </div>
+          <div class="form-group full">
+            <label for="cfd-ativo">Ativo / Par</label>
+            <select id="cfd-ativo">
+              <optgroup label="COMMODITIES">
+                <option value="XAU/USD" selected>Ouro (XAU/USD)</option>
+                <option value="XAG/USD">Prata (XAG/USD)</option>
+                <option value="WTI">Petróleo (WTI)</option>
+              </optgroup>
+              <optgroup label="FOREX">
+                <option value="" disabled>EUR/USD, GBP/USD — em breve</option>
+              </optgroup>
+              <optgroup label="ÍNDICES">
+                <option value="US500">S&amp;P 500 (US500)</option>
+                <option value="US100">Nasdaq 100 (US100)</option>
+                <option value="US30">Dow Jones (US30)</option>
+              </optgroup>
+              <optgroup label="CRIPTO">
+                <option value="BTC/USD">Bitcoin (BTC/USD)</option>
+                <option value="ETH/USD">Ethereum (ETH/USD)</option>
+                <option value="SOL/USD">Solana (SOL/USD)</option>
+              </optgroup>
+              <optgroup label="AÇÕES">
+                <option value="AAPL">Apple (AAPL)</option>
+                <option value="TSLA">Tesla (TSLA)</option>
+                <option value="NVDA">NVIDIA (NVDA)</option>
+                <option value="MSFT">Microsoft (MSFT)</option>
+              </optgroup>
+            </select>
+          </div>
+          <div class="volume-contract-row">
+            <div class="form-group">
+              <label for="cfd-contrato">Contrato(s)</label>
+              <input type="number" id="cfd-contrato" value="100" min="0.01" step="0.01" placeholder="Ex: 100, 5000">
+            </div>
+            <div class="form-group">
+              <label for="cfd-lotes">Volume</label>
+              <input type="number" id="cfd-lotes" value="1" min="0.01" step="0.01" placeholder="Ex: 0.10, 1.00">
+            </div>
+            <div class="form-group">
+              <label for="cfd-lote-legend">Referência do Lote</label>
+              <input type="text" id="cfd-lote-legend" class="readonly-field" readonly value="1 lote = 100 oz" tabindex="-1">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="cfd-preco-entrada">Preço de Entrada</label>
+            <input type="number" id="cfd-preco-entrada" value="2650.00" min="0" step="0.01">
+          </div>
+          <div class="form-group">
+            <label for="cfd-preco-saida">Preço de Saída (Atual)</label>
+            <input type="number" id="cfd-preco-saida" value="2689.75" min="0" step="0.01">
+          </div>
+          <div class="form-group">
+            <label for="cfd-stop-loss">Preço de Stop Loss (Limite de Perda)</label>
+            <input type="number" id="cfd-stop-loss" value="2610.25" min="0" step="0.01">
+          </div>
+          <div class="form-group">
+            <label for="cfd-take-profit">Preço de Take Profit (Alvo de Lucro)</label>
+            <input type="number" id="cfd-take-profit" value="2729.50" min="0" step="0.01">
+          </div>
+          <div class="form-group full">
+            <label for="cfd-alavancagem">Alavancagem</label>
+            <select id="cfd-alavancagem">
+              <option value="1000">1:1000 — Super Alavancagem</option>
+              <option value="2">1:2</option>
+              <option value="5">1:5</option>
+              <option value="10">1:10</option>
+              <option value="20">1:20</option>
+              <option value="30">1:30</option>
+              <option value="50" selected>1:50</option>
+              <option value="100">1:100</option>
+              <option value="200">1:200</option>
+              <option value="500">1:500</option>
+            </select>
+            <div class="leverage-display" id="cfd-lev-wrap">Alavancagem selecionada: <span id="cfd-lev-display">1:50</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Risco-Retorno (R:R)</div>
+        <div class="rr-spotlight">
+          <div class="result-item risk-item" id="cfd-risco-container">
+            <div class="result-label">Risco Potencial</div>
+            <div class="result-value" id="cfd-risco">—</div>
+            <div class="result-sub" id="cfd-risco-sub">Entrada → Stop Loss × volume</div>
+          </div>
+          <div class="result-item reward-item" id="cfd-retorno-container">
+            <div class="result-label">Retorno Potencial</div>
+            <div class="result-value" id="cfd-retorno">—</div>
+            <div class="result-sub" id="cfd-retorno-sub">Entrada → Take Profit × volume</div>
+          </div>
+          <div class="result-item rr-ratio" id="cfd-rr-container">
+            <div class="result-label">Proporção R:R</div>
+            <div class="result-value" id="cfd-rr">—</div>
+            <div class="result-sub" id="cfd-rr-sub">Risco vs retorno projetado</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Métricas de Alavancagem</div>
+        <div class="results leverage-metrics">
+          <div class="result-item">
+            <div class="result-label">Exposição Total</div>
+            <div class="result-value" id="cfd-exposicao">—</div>
+            <div class="result-sub" id="cfd-exposicao-sub"></div>
+          </div>
+          <div class="result-item highlight">
+            <div class="result-label">Margem Requerida</div>
+            <div class="result-value" id="cfd-margem">—</div>
+            <div class="result-sub">Capital necessário</div>
+          </div>
+          <div class="result-item pip-value" id="cfd-pip-container">
+            <div class="result-label">Valor por Ponto (Pip)</div>
+            <div class="result-value" id="cfd-valor-ponto">—</div>
+            <div class="result-sub" id="cfd-valor-ponto-sub">Por 1 ponto inteiro de variação</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Resultados da Simulação</div>
+        <div class="results">
+          <div class="result-item">
+            <div class="result-label">Ativo</div>
+            <div class="result-value" id="cfd-ativo-display" style="font-size:13px;">—</div>
+          </div>
+          <div class="result-item">
+            <div class="result-label">Variação de Preço</div>
+            <div class="result-value" id="cfd-variacao">—</div>
+          </div>
+          <div class="result-item" id="cfd-pnl-container">
+            <div class="result-label">P&amp;L (Lucro/Prejuízo)</div>
+            <div class="result-value" id="cfd-pnl">—</div>
+            <div class="result-sub" id="cfd-pnl-sub"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card cfd-summary-card">
+        <div class="card-title">Resumo Dinâmico da Operação</div>
+        <div class="cfd-summary-text long-mode" id="cfd-operation-summary">Configure os parâmetros para gerar o resumo técnico da operação.</div>
+      </div>
+    </section>
+
+    <!-- PAINEL DE HISTÓRICO -->
+    <section class="history-section" id="history-section">
+      <div class="history-header">
+        <div class="history-header-text">
+          <h2>Painel de Comparações e Histórico</h2>
+          <p>Salve simulações para comparar cenários e registrar suas anotações de estudo. Os dados ficam armazenados localmente no seu navegador.</p>
+        </div>
+        <div class="history-actions">
+          <button type="button" class="btn-save" id="btn-save-simulation">💾 Salvar e Anotar Simulação</button>
+          <button type="button" class="btn-clear" id="btn-clear-history">Limpar histórico</button>
+        </div>
+      </div>
+
+      <div class="note-field-wrap">
+        <label for="history-note">Anotação (opcional)</label>
+        <textarea id="history-note" placeholder="Ex: CDB 100% CDI por 1 ano · T-Bond 10Y com dólar de R$ 5,80 para R$ 6,20..." rows="2"></textarea>
+      </div>
+
+      <div class="table-wrap">
+        <table class="spreadsheet" id="history-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Data/Hora</th>
+              <th>Tipo de Ativo</th>
+              <th>Prazo</th>
+              <th>Rentabilidade Bruta</th>
+              <th>Imposto</th>
+              <th>Líquido Final</th>
+              <th>Anotação</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="history-tbody">
+            <tr class="table-empty-row">
+              <td colspan="9">
+                <div class="table-empty">
+                  <span>📋</span>
+                  Nenhuma simulação salva ainda. Execute um cálculo e clique em "Salvar e Anotar Simulação".
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <footer class="footer">
+      &copy; 2026 CAPITAL FINANCE — Plataforma analítica educacional. Sem recomendações de investimento.
+    </footer>
+  </div>
+
+  <div class="save-toast" id="save-toast">Simulação salva com sucesso!</div>
+
+  <script>
+    /* ============================================================
+       CONSTANTES
+    ============================================================ */
+    const CDI_TAXA_REFERENCIA = 12.25;
+
+    /** Inflação projetada (IPCA+) — somada à taxa real digitada pelo usuário */
+    const INFLACAO_PROJETADA = 4.5;
+
+    /** Tesouro Direto — prazo fixo (2026 → vencimento) e taxa sugerida de mercado */
+    const titulosConfig = {
+      'Tesouro Prefixado 2037 (10 Anos)': { prazo: 11, taxaSugerida: 12.5, tipo: 'pre' },
+      'Tesouro IPCA+ 2045 (20 Anos)': { prazo: 19, taxaSugerida: 6.5, tipo: 'ipca' },
+      'Tesouro IPCA+ 2055 (30 Anos)': { prazo: 29, taxaSugerida: 6.7, tipo: 'ipca' }
+    };
+
+    const TBONDS = {
+      '10': { label: 'T-Bond 10 Anos', anos: 10, taxa: 4.25 },
+      '20': { label: 'T-Bond 20 Anos', anos: 20, taxa: 4.65 },
+      '30': { label: 'T-Bond 30 Anos', anos: 30, taxa: 4.72 }
+    };
+
+    const STORAGE_KEY = 'simuladores_financeiros_historico';
+
+    /* Catálogo de ativos CFD — preços de referência educacionais */
+    const CFD_ASSETS = {
+      'AAPL':    { label: 'Apple (AAPL)',           segment: 'Ações',       preco: 225,    contrato: 1,   step: 0.01,   slPct: 0.02,  tpPct: 0.04, valorPontoPorLote: 1,   unidadePonto: 'ponto' },
+      'TSLA':    { label: 'Tesla (TSLA)',           segment: 'Ações',       preco: 350,    contrato: 1,   step: 0.01,   slPct: 0.03,  tpPct: 0.06, valorPontoPorLote: 1,   unidadePonto: 'ponto' },
+      'NVDA':    { label: 'NVIDIA (NVDA)',          segment: 'Ações',       preco: 135,    contrato: 1,   step: 0.01,   slPct: 0.025, tpPct: 0.05, valorPontoPorLote: 1,   unidadePonto: 'ponto' },
+      'MSFT':    { label: 'Microsoft (MSFT)',       segment: 'Ações',       preco: 420,    contrato: 1,   step: 0.01,   slPct: 0.02,  tpPct: 0.04, valorPontoPorLote: 1,   unidadePonto: 'ponto' },
+      'BTC/USD': { label: 'Bitcoin (BTC/USD)',      segment: 'Cripto',      preco: 97000,  contrato: 1,   step: 1,      slPct: 0.03,  tpPct: 0.06, valorPontoPorLote: 1,   unidadePonto: 'ponto' },
+      'ETH/USD': { label: 'Ethereum (ETH/USD)',     segment: 'Cripto',      preco: 3500,   contrato: 1,   step: 0.01,   slPct: 0.03,  tpPct: 0.06, valorPontoPorLote: 1,   unidadePonto: 'ponto' },
+      'SOL/USD': { label: 'Solana (SOL/USD)',       segment: 'Cripto',      preco: 180,    contrato: 1,   step: 0.01,   slPct: 0.04,  tpPct: 0.08, valorPontoPorLote: 1,   unidadePonto: 'ponto' },
+      'XAU/USD': { label: 'Ouro (XAU/USD)',         segment: 'Commodities', preco: 2650,   contrato: 100,  step: 0.01,   slPct: 0.015, tpPct: 0.03, valorPontoPorLote: 100,  unidadePonto: 'US$' },
+      'WTI':     { label: 'Petróleo (WTI)',         segment: 'Commodities', preco: 72,     contrato: 1000, step: 0.01,   slPct: 0.02,  tpPct: 0.04, valorPontoPorLote: 1000, unidadePonto: 'US$' },
+      'XAG/USD': { label: 'Prata (XAG/USD)',        segment: 'Commodities', preco: 31,     contrato: 5000, step: 0.001,  slPct: 0.02,  tpPct: 0.04, valorPontoPorLote: 5000, unidadePonto: 'US$' },
+      'US500':   { label: 'S&P 500 (US500)',        segment: 'Índices',     preco: 5800,   contrato: 1,   step: 0.1,    slPct: 0.01,  tpPct: 0.02, valorPontoPorLote: 1,   unidadePonto: 'ponto' },
+      'US100':   { label: 'Nasdaq 100 (US100)',     segment: 'Índices',     preco: 20500,  contrato: 1,   step: 0.1,    slPct: 0.01,  tpPct: 0.02, valorPontoPorLote: 1,   unidadePonto: 'ponto' },
+      'US30':    { label: 'Dow Jones (US30)',       segment: 'Índices',     preco: 42000,  contrato: 1,   step: 1,      slPct: 0.01,  tpPct: 0.02, valorPontoPorLote: 1,   unidadePonto: 'ponto' }
+    };
+
+    /** Símbolos por classe — motor de multiplicadores dinâmico */
+    const METAL_SYMBOLS = ['XAU/USD', 'XAG/USD'];
+    const FOREX_SYMBOLS = []; /* Adicione pares futuros: 'EUR/USD', 'GBP/USD', 'USD/JPY', etc. */
+    const OIL_SYMBOLS = ['WTI', 'BRENT'];
+    const STOCKS_SYMBOLS = ['AAPL', 'TSLA', 'NVDA', 'MSFT'];
+    const CRYPTO_SYMBOLS = ['BTC/USD', 'ETH/USD', 'SOL/USD'];
+    const INDICES_SYMBOLS = ['US500', 'US100', 'US30'];
+
+    /**
+     * Multiplicador flexível de P&L / Valor por Ponto (por US$ 1,00 de variação de preço)
+     * Metais (XAU, XAG): 1.00 — US$ 1,00 de variação = US$ 1,00 por onça
+     * FOREX e pares em escala de centavos: 0.01
+     */
+    function getMultiplicadorCFD(symbol) {
+      if (METAL_SYMBOLS.indexOf(symbol) !== -1) return 1.00;
+      if (FOREX_SYMBOLS.indexOf(symbol) !== -1) return 0.01;
+      if (OIL_SYMBOLS.indexOf(symbol) !== -1) return 1.00;
+      if (INDICES_SYMBOLS.indexOf(symbol) !== -1 || CRYPTO_SYMBOLS.indexOf(symbol) !== -1) return 1.00;
+      return 0.01;
+    }
+
+    /**
+     * Especificação completa por ativo: multiplicador, contrato padrão e legenda do lote.
+     */
+    function getEspecificacaoCFD(symbol) {
+      if (symbol === 'XAU/USD') {
+        return {
+          mult: 1.00,
+          contratoPadrao: 100,
+          legenda: '1 lote = 100 oz',
+          categoria: 'commodities'
+        };
+      }
+      if (symbol === 'XAG/USD') {
+        return {
+          mult: 1.00,
+          contratoPadrao: 5000,
+          legenda: '1 lote = 5.000 oz',
+          categoria: 'commodities'
+        };
+      }
+      if (OIL_SYMBOLS.indexOf(symbol) !== -1) {
+        return {
+          mult: 1.00,
+          contratoPadrao: 1000,
+          legenda: '1 lote = 1.000 barris',
+          categoria: 'commodities'
+        };
+      }
+      if (FOREX_SYMBOLS.indexOf(symbol) !== -1) {
+        return {
+          mult: 0.01,
+          contratoPadrao: 100000,
+          legenda: '1 lote = 100k unidades',
+          categoria: 'forex'
+        };
+      }
+      if (INDICES_SYMBOLS.indexOf(symbol) !== -1 || CRYPTO_SYMBOLS.indexOf(symbol) !== -1) {
+        return {
+          mult: 1.00,
+          contratoPadrao: 1,
+          legenda: '1 lote = 1 contrato',
+          categoria: 'outros'
+        };
+      }
+      if (STOCKS_SYMBOLS.indexOf(symbol) !== -1) {
+        return {
+          mult: 0.01,
+          contratoPadrao: 1,
+          legenda: '1 lote = 1 ação',
+          categoria: 'outros'
+        };
+      }
+      return {
+        mult: 0.01,
+        contratoPadrao: 1,
+        legenda: '1 lote = 1 unidade',
+        categoria: 'forex'
+      };
+    }
+
+    function getContratoPadrao(symbol) {
+      return getEspecificacaoCFD(symbol).contratoPadrao;
+    }
+
+    function getMultiplicadorPnL(symbol) {
+      return getMultiplicadorCFD(symbol);
+    }
+
+    function getMultiplicadorPonto(symbol) {
+      return getMultiplicadorCFD(symbol);
+    }
+
+    function getLegendaLote(symbol) {
+      return getEspecificacaoCFD(symbol).legenda;
+    }
+
+    function updateCFDLoteLegend(symbol) {
+      const el = document.getElementById('cfd-lote-legend');
+      if (el) el.value = getLegendaLote(symbol);
+    }
+
+    /* ============================================================
+       ESTADO GLOBAL
+    ============================================================ */
+    const state = {
+      activeTab: 'renda-fixa',
+      rfMarket: 'br',
+      cfdDirection: 'long',
+      brData: { valid: false },
+      usData: { valid: false },
+      cfdData: { valid: false },
+      history: []
+    };
+
+    /* ============================================================
+       FORMATAÇÃO
+    ============================================================ */
+    function formatBRL(value) {
+      const n = Number(value);
+      if (isNaN(n) || !isFinite(n)) return 'R$ 0,00';
+      return n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    }
+
+    function formatUSD(value) {
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency', currency: 'USD',
+        minimumFractionDigits: 2, maximumFractionDigits: 2
+      }).format(value);
+    }
+
+    /** USD com símbolo $ e formatação pt-BR (Ex: $ 1.724,14) */
+    function formatUSDDisplay(value) {
+      const n = Number(value);
+      if (isNaN(n) || !isFinite(n)) return '$ 0,00';
+      const sign = n < 0 ? '-' : '';
+      return sign + '$ ' + Math.abs(n).toLocaleString('pt-BR', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+    }
+
+    function formatUSDDisplaySigned(value) {
+      const n = Number(value);
+      if (isNaN(n) || !isFinite(n)) return '$ 0,00';
+      if (n > 0) return '+' + formatUSDDisplay(n);
+      if (n < 0) return formatUSDDisplay(n);
+      return formatUSDDisplay(0);
+    }
+
+    function formatNumber(value, decimals) {
+      return new Intl.NumberFormat('pt-BR', {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals
+      }).format(value);
+    }
+
+    function formatPercent(value, decimals) {
+      return formatNumber(value, decimals !== undefined ? decimals : 2) + '%';
+    }
+
+    function formatDateTime(isoString) {
+      return new Date(isoString).toLocaleString('pt-BR', {
+        day: '2-digit', month: '2-digit', year: 'numeric',
+        hour: '2-digit', minute: '2-digit'
+      });
+    }
+
+    function generateId() {
+      return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById('save-toast');
+      toast.textContent = message;
+      toast.classList.add('show');
+      setTimeout(function() { toast.classList.remove('show'); }, 2800);
+    }
+
+    function setResultClass(el, value) {
+      el.classList.remove('positive', 'negative');
+      if (value > 0.005) el.classList.add('positive');
+      else if (value < -0.005) el.classList.add('negative');
+    }
+
+    /* ============================================================
+       MERCADO BRASIL — Tesouro Direto + Selic/CDI (juros compostos anuais)
+    ============================================================ */
+    function getBrAtivoSelecionado() {
+      return document.getElementById('br-indexador').value;
+    }
+
+    function getBrTituloConfig(ativo) {
+      return titulosConfig[ativo] || null;
+    }
+
+    function isTituloTesouroBR(ativo) {
+      return !!getBrTituloConfig(ativo);
+    }
+
+    function getBrAtivoLabel(ativo) {
+      if (ativo === 'cdi') return 'CDI';
+      if (ativo === 'selic') return 'Selic (Taxa Meta)';
+      return ativo;
+    }
+
+    function setBrasilCampoTravado(el, travado) {
+      el.disabled = travado;
+      el.classList.toggle('readonly-field', travado);
+    }
+
+    /**
+     * Taxa efetiva final para juros compostos anuais
+     * IPCA+: taxa digitada + inflação projetada | PRE/Selic: taxa digitada | CDI: % do CDI
+     */
+    function calcularTaxaEfetivaFinalBR(ativo, taxaDigitada) {
+      const cfg = getBrTituloConfig(ativo);
+      if (cfg && cfg.tipo === 'ipca') {
+        return taxaDigitada + INFLACAO_PROJETADA;
+      }
+      if (cfg && cfg.tipo === 'pre') {
+        return taxaDigitada;
+      }
+      if (ativo === 'cdi') {
+        return CDI_TAXA_REFERENCIA * (taxaDigitada / 100);
+      }
+      return taxaDigitada;
+    }
+
+    function formatTaxaEfetivaCardBR(ativo, taxaDigitada, taxaEfetivaFinal) {
+      const cfg = getBrTituloConfig(ativo);
+      if (cfg && cfg.tipo === 'ipca') {
+        return formatPercent(taxaEfetivaFinal) + ' a.a.';
+      }
+      if (cfg && cfg.tipo === 'pre') {
+        return formatPercent(taxaEfetivaFinal) + ' a.a.';
+      }
+      if (ativo === 'cdi') {
+        return formatPercent(taxaDigitada, 0) + ' CDI (' + formatPercent(taxaEfetivaFinal) + ' a.a.)';
+      }
+      return formatPercent(taxaEfetivaFinal) + ' a.a.';
+    }
+
+    function getAliquotaIRRegressivaAnos(anos) {
+      if (anos <= 0.5) return 22.5;
+      if (anos <= 1) return 20;
+      if (anos <= 2) return 17.5;
+      return 15;
+    }
+
+    /** Atualiza UI ao trocar o título — prazo travado nos Tesouros; taxa sempre editável */
+    function updateBrasilLabels() {
+      const ativo = getBrAtivoSelecionado();
+      const cfg = getBrTituloConfig(ativo);
+      const label = document.getElementById('br-taxa-label');
+      const suffix = document.getElementById('br-taxa-suffix');
+      const hint = document.getElementById('br-taxa-hint');
+      const prazoEl = document.getElementById('br-anos');
+      const taxaEl = document.getElementById('br-taxa');
+
+      taxaEl.disabled = false;
+      taxaEl.classList.remove('readonly-field');
+
+      if (cfg) {
+        prazoEl.value = cfg.prazo;
+        setBrasilCampoTravado(prazoEl, true);
+        taxaEl.value = cfg.taxaSugerida;
+        taxaEl.placeholder = 'Sugerido: ' + formatNumber(cfg.taxaSugerida, 1) + '% a.a.';
+
+        if (cfg.tipo === 'pre') {
+          label.textContent = 'Taxa Contratada (% a.a.)';
+          suffix.textContent = '% a.a.';
+          hint.innerHTML = '<strong>' + ativo + '</strong>: prazo travado em <strong>' + cfg.prazo +
+            ' anos</strong>. Informe a taxa contratada (sugerida: <strong>' +
+            formatPercent(cfg.taxaSugerida) + ' a.a.</strong>). IR fixo <strong>15%</strong>.';
+        } else {
+          label.textContent = 'Taxa Real IPCA+ (% a.a.)';
+          suffix.textContent = '% a.a. real';
+          hint.innerHTML = '<strong>' + ativo + '</strong>: prazo travado em <strong>' + cfg.prazo +
+            ' anos</strong>. Taxa efetiva = taxa digitada + <strong>' +
+            formatPercent(INFLACAO_PROJETADA) + ' infl. proj.</strong> (sugerida: ' +
+            formatPercent(cfg.taxaSugerida) + ' real). IR fixo <strong>15%</strong>.';
+        }
+      } else if (ativo === 'selic') {
+        setBrasilCampoTravado(prazoEl, false);
+        taxaEl.placeholder = 'Ex: 14,25';
+        label.textContent = 'Taxa Selic Meta (% a.a.)';
+        suffix.textContent = '% a.a.';
+        hint.innerHTML = 'Informe taxa e prazo livremente. Taxa efetiva = valor digitado. IR regressivo conforme o prazo.';
+      } else {
+        setBrasilCampoTravado(prazoEl, false);
+        taxaEl.placeholder = 'Ex: 100';
+        label.textContent = 'Percentual do CDI';
+        suffix.textContent = '% CDI';
+        hint.innerHTML = 'Informe <strong>100</strong> para 100% do CDI. Referência: <strong>' +
+          formatNumber(CDI_TAXA_REFERENCIA, 2) + '% a.a.</strong> Prazo e taxa livres. IR regressivo.';
+      }
+
+      document.getElementById('br-cdi-ref').textContent = formatNumber(CDI_TAXA_REFERENCIA, 2);
+    }
+
+    /** Garante prazo travado nos Tesouros sem alterar a taxa digitada pelo usuário */
+    function enforceBrasilPrazoTesouro() {
+      const ativo = getBrAtivoSelecionado();
+      const cfg = getBrTituloConfig(ativo);
+      const prazoEl = document.getElementById('br-anos');
+      if (cfg) {
+        prazoEl.value = cfg.prazo;
+        setBrasilCampoTravado(prazoEl, true);
+      }
+    }
+
+    function calcularBrasil() {
+      enforceBrasilPrazoTesouro();
+
+      const valorInvestido = parseFloat(document.getElementById('br-valor').value) || 0;
+      const ativo = getBrAtivoSelecionado();
+      const cfg = getBrTituloConfig(ativo);
+      const prazo = parseFloat(document.getElementById('br-anos').value) || 0;
+      const taxaDigitada = parseFloat(document.getElementById('br-taxa').value) || 0;
+
+      if (valorInvestido <= 0 || prazo <= 0 || taxaDigitada < 0) {
+        resetBrasilResults();
+        return;
+      }
+
+      const taxaEfetivaFinal = calcularTaxaEfetivaFinalBR(ativo, taxaDigitada);
+      const rendimentoBruto = valorInvestido * Math.pow(1 + taxaEfetivaFinal / 100, prazo) - valorInvestido;
+
+      let valorImposto;
+      let aliquotaIR;
+      if (isTituloTesouroBR(ativo)) {
+        aliquotaIR = 15;
+        valorImposto = rendimentoBruto * 0.15;
+      } else {
+        aliquotaIR = getAliquotaIRRegressivaAnos(prazo);
+        valorImposto = rendimentoBruto * (aliquotaIR / 100);
+      }
+
+      const valorLiquido = valorInvestido + rendimentoBruto - valorImposto;
+
+      document.getElementById('br-taxa-efetiva').textContent =
+        formatTaxaEfetivaCardBR(ativo, taxaDigitada, taxaEfetivaFinal);
+      document.getElementById('br-bruto').textContent = formatBRL(rendimentoBruto);
+      document.getElementById('br-aliquota').textContent = formatPercent(aliquotaIR, 1);
+      document.getElementById('br-ir').textContent = formatBRL(valorImposto);
+      document.getElementById('br-liquido').textContent = formatBRL(valorLiquido);
+
+      state.brData = {
+        valid: true,
+        indexador: getBrAtivoLabel(ativo),
+        indexadorKey: ativo,
+        taxaInput: taxaDigitada,
+        taxaEfetiva: taxaEfetivaFinal,
+        inflacaoProjetada: cfg && cfg.tipo === 'ipca' ? INFLACAO_PROJETADA : null,
+        valor: valorInvestido,
+        anos: prazo,
+        rendimentoBruto: rendimentoBruto,
+        aliquotaIR: aliquotaIR,
+        ir: valorImposto,
+        liquido: valorLiquido
+      };
+    }
+
+    function resetBrasilResults() {
+      ['br-taxa-efetiva', 'br-bruto', 'br-ir', 'br-liquido'].forEach(function(id) {
+        document.getElementById(id).textContent = '—';
+      });
+      document.getElementById('br-aliquota').textContent = '—';
+      state.brData = { valid: false };
+    }
+
+    /* ============================================================
+       MERCADO EUA — COM EFEITO CAMBIAL
+    ============================================================ */
+    function updateTBondDisplay() {
+      const bond = TBONDS[document.getElementById('us-tbond').value];
+      const prazoEl = document.getElementById('us-anos');
+      prazoEl.value = bond.anos;
+      setBrasilCampoTravado(prazoEl, true);
+      document.getElementById('us-tbond-yield').textContent =
+        'Yield: ' + formatPercent(bond.taxa) + ' a.a. · Vencimento: ' + bond.anos + ' anos';
+    }
+
+    function calcularEUA() {
+      updateTBondDisplay();
+
+      const valorBRL = parseFloat(document.getElementById('us-valor').value) || 0;
+      const prazoAnos = parseFloat(document.getElementById('us-anos').value) || 0;
+      const cambioEntrada = parseFloat(document.getElementById('us-cambio-entrada').value) || 0;
+      const cambioSaida = parseFloat(document.getElementById('us-cambio-saida').value) || 0;
+      const bond = TBONDS[document.getElementById('us-tbond').value];
+
+      if (valorBRL <= 0 || prazoAnos <= 0 || cambioEntrada <= 0 || cambioSaida <= 0) {
+        resetEUAResults();
+        return;
+      }
+
+      const valorInicialUSD = valorBRL / cambioEntrada;
+      const valorFinalUSD = valorInicialUSD * Math.pow(1 + bond.taxa / 100, prazoAnos);
+      const ganhoNominalUSD = valorFinalUSD - valorInicialUSD;
+
+      const valorFinalBRL = valorFinalUSD * cambioSaida;
+      const valorFinalBRLSemFX = valorFinalUSD * cambioEntrada;
+      const ganhoCambialExtra = valorFinalBRL - valorFinalBRLSemFX;
+
+      const lucroTotalBRL = Math.round((valorFinalBRL - valorBRL) * 100) / 100;
+      const ir = lucroTotalBRL > 0 ? Math.round(lucroTotalBRL * 0.15 * 100) / 100 : 0;
+      const liquido = Math.round((valorBRL + lucroTotalBRL - ir) * 100) / 100;
+
+      document.getElementById('us-investido-usd').textContent = formatUSDDisplay(valorInicialUSD);
+      document.getElementById('us-final-usd').textContent = formatUSDDisplay(valorFinalUSD);
+
+      const ganhoUsdEl = document.getElementById('us-ganho-usd');
+      ganhoUsdEl.textContent = formatUSDDisplaySigned(ganhoNominalUSD);
+      setResultClass(document.getElementById('us-ganho-usd-container'), ganhoNominalUSD);
+      setResultClass(document.getElementById('us-final-usd-container'), ganhoNominalUSD);
+
+      const ganhoCambialEl = document.getElementById('us-ganho-cambial');
+      ganhoCambialEl.textContent = (ganhoCambialExtra >= 0 ? '+' : '') + formatBRL(ganhoCambialExtra);
+      setResultClass(document.getElementById('us-ganho-cambial-container'), ganhoCambialExtra);
+
+      const lucroEl = document.getElementById('us-lucro-total');
+      lucroEl.textContent = (lucroTotalBRL >= 0 ? '+' : '') + formatBRL(lucroTotalBRL);
+      setResultClass(document.getElementById('us-lucro-total-container'), lucroTotalBRL);
+
+      document.getElementById('us-ir').textContent = formatBRL(ir);
+      document.getElementById('us-liquido').textContent = formatBRL(liquido);
+
+      state.usData = {
+        valid: true,
+        tbond: bond.label,
+        taxa: bond.taxa,
+        valor: valorBRL,
+        anos: prazoAnos,
+        cambioEntrada: cambioEntrada,
+        cambioSaida: cambioSaida,
+        valorInicialUSD: valorInicialUSD,
+        valorFinalUSD: valorFinalUSD,
+        ganhoNominalUSD: ganhoNominalUSD,
+        ganhoCambialExtra: ganhoCambialExtra,
+        lucroTotalBRL: lucroTotalBRL,
+        ir: ir,
+        liquido: liquido
+      };
+    }
+
+    function resetEUAResults() {
+      [
+        'us-investido-usd', 'us-final-usd',
+        'us-ganho-usd', 'us-ganho-cambial', 'us-lucro-total', 'us-ir', 'us-liquido'
+      ].forEach(function(id) {
+        document.getElementById(id).textContent = '—';
+      });
+      [
+        'us-ganho-usd-container', 'us-final-usd-container', 'us-ganho-cambial-container',
+        'us-lucro-total-container', 'us-ir-container', 'us-liquido-container'
+      ].forEach(function(id) {
+        document.getElementById(id).classList.remove('positive', 'negative');
+      });
+      state.usData = { valid: false };
+    }
+
+    /* ============================================================
+       CFD
+    ============================================================ */
+    function getCFDAssetInfo(symbol) {
+      const base = CFD_ASSETS[symbol] || {
+        label: symbol, segment: '—', preco: 100,
+        step: 0.01, slPct: 0.02, tpPct: 0.04
+      };
+      return Object.assign({}, base, {
+        contratoPadrao: getContratoPadrao(symbol),
+        mult: getMultiplicadorCFD(symbol),
+        legendaLote: getLegendaLote(symbol)
+      });
+    }
+
+    function parseLocaleNumber(value) {
+      if (value === null || value === undefined || value === '') return 0;
+      if (typeof value === 'number') return isNaN(value) ? 0 : value;
+      let str = String(value).trim().replace(/\s/g, '');
+      if (!str) return 0;
+      if (str.includes(',') && str.includes('.')) {
+        str = str.replace(/\./g, '').replace(',', '.');
+      } else if (str.includes(',')) {
+        str = str.replace(',', '.');
+      }
+      const n = parseFloat(str);
+      return isNaN(n) ? 0 : n;
+    }
+
+    /** Fator monetário = mult × Contrato(s) × Volume — usado em P&L, Risco, Retorno e Valor por Ponto */
+    function calcularFatorMonetario(symbol, contratos, volume) {
+      return getMultiplicadorCFD(symbol) * contratos * volume;
+    }
+
+    function calcularFatorPnL(symbol, contratos, volume) {
+      return calcularFatorMonetario(symbol, contratos, volume);
+    }
+
+    function calcularValorPorPonto(symbol, contratos, volume) {
+      return calcularFatorMonetario(symbol, contratos, volume);
+    }
+
+    function formatMultLabel(value) {
+      return formatNumber(value, 2);
+    }
+
+    function buildFormulaMultLabel(symbol, contratos, volume) {
+      const mult = getMultiplicadorCFD(symbol);
+      return formatMultLabel(mult) + ' × ' + formatNumber(contratos, 0) + ' × ' + formatNumber(volume, 2);
+    }
+
+    function buildFormulaPnLLabel(symbol, contratos) {
+      const mult = getMultiplicadorCFD(symbol);
+      return formatMultLabel(mult) + ' × ' + formatNumber(contratos, 0) + ' × Vol';
+    }
+
+    function buildCFDOperationSummary(data) {
+      if (!data || !data.valid) {
+        return 'Configure os parâmetros para gerar o resumo técnico da operação.';
+      }
+
+      const isLong = data.direction === 'long';
+      const dec = data.assetStep < 1 ? 4 : (data.assetStep < 10 ? 2 : 0);
+      let msg = '';
+
+      if (isLong) {
+        msg += '📈 OPERAÇÃO COMPRADA (LONG)\n';
+        msg += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n';
+        msg += 'Direção: COMPRA (Long)\n';
+        msg += 'Lógica: lucro ocorre na ALTA do preço\n\n';
+        msg += 'Ativo: ' + data.ativo + ' (' + data.segment + ')\n';
+        msg += 'Contrato(s): ' + formatNumber(data.contratos, 2) + ' · Volume: ' + formatNumber(data.volume, 2) + '\n';
+        msg += 'Mult. variação: ' + formatMultLabel(data.mult) + ' · Valor/US$: ' + formatUSDExact(data.valorPorPonto) + '\n';
+        msg += 'Alavancagem: 1:' + data.alavancagem + '\n\n';
+        msg += 'Preço de Entrada: ' + formatNumber(data.precoEntrada, dec) + '\n';
+        msg += 'Stop Loss: ' + formatNumber(data.stopLoss, dec) + ' (ABAIXO da entrada — limite de perda)\n';
+        msg += 'Take Profit: ' + formatNumber(data.takeProfit, dec) + ' (ACIMA da entrada — alvo de lucro)\n';
+        msg += 'Preço Atual/Saída: ' + formatNumber(data.precoSaida, dec) + '\n\n';
+      } else {
+        msg += '📉 OPERAÇÃO VENDIDA (SHORT)\n';
+        msg += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n';
+        msg += 'Direção: VENDA (Short)\n';
+        msg += 'Lógica: lucro ocorre na QUEDA do preço\n\n';
+        msg += 'Ativo: ' + data.ativo + ' (' + data.segment + ')\n';
+        msg += 'Contrato(s): ' + formatNumber(data.contratos, 2) + ' · Volume: ' + formatNumber(data.volume, 2) + '\n';
+        msg += 'Mult. variação: ' + formatMultLabel(data.mult) + ' · Valor/US$: ' + formatUSDExact(data.valorPorPonto) + '\n';
+        msg += 'Alavancagem: 1:' + data.alavancagem + '\n\n';
+        msg += 'Preço de Entrada (Venda): ' + formatNumber(data.precoEntrada, dec) + '\n';
+        msg += 'Stop Loss: ' + formatNumber(data.stopLoss, dec) + ' (ACIMA da entrada — proteção se o mercado SUBIR contra a posição)\n';
+        msg += 'Take Profit: ' + formatNumber(data.takeProfit, dec) + ' (ABAIXO da entrada — lucro na desvalorização)\n';
+        msg += 'Preço Atual/Recompra: ' + formatNumber(data.precoSaida, dec) + '\n\n';
+      }
+
+      msg += 'Exposição Total: ' + formatUSD(data.exposicaoTotal) + '\n';
+      msg += 'Margem Requerida: ' + formatUSD(data.margemRequerida) + '\n';
+      msg += 'Valor por Ponto: ' + formatUSD(data.valorPorPonto) + ' / ponto\n\n';
+
+      if (data.rrValid || data.riscoPotencial > 0 || data.retornoPotencial > 0) {
+        msg += 'Risco Potencial: ' + formatUSDExact(data.riscoPotencial) + '\n';
+        msg += 'Retorno Potencial: ' + formatUSDExact(data.retornoPotencial) + '\n';
+        msg += data.rrLabel + '\n\n';
+      }
+
+      msg += 'P&L Atual: ' + (data.pnl >= 0 ? '+' : '') + formatUSD(data.pnl) + '\n';
+      msg += 'Variação: ' + (data.variacaoPercent >= 0 ? '+' : '') + formatPercent(data.variacaoPercent);
+
+      return msg;
+    }
+
+    function updateCFDOperationSummary(data) {
+      const el = document.getElementById('cfd-operation-summary');
+      el.textContent = buildCFDOperationSummary(data);
+      el.classList.remove('long-mode', 'short-mode');
+      if (data && data.valid) {
+        el.classList.add(data.direction === 'short' ? 'short-mode' : 'long-mode');
+      } else {
+        el.classList.add('long-mode');
+      }
+    }
+
+    function roundToStep(value, step) {
+      const decimals = step >= 1 ? 0 : (String(step).split('.')[1] || '').length || 2;
+      const factor = Math.pow(10, decimals);
+      return Math.round(value * factor) / factor;
+    }
+
+    function applyCFDAssetDefaults() {
+      const symbol = document.getElementById('cfd-ativo').value;
+      const asset = getCFDAssetInfo(symbol);
+      const entrada = asset.preco;
+      const isLong = state.cfdDirection === 'long';
+
+      let stopLoss, takeProfit, saida;
+      if (isLong) {
+        stopLoss = entrada * (1 - asset.slPct);
+        takeProfit = entrada * (1 + asset.tpPct);
+        saida = entrada * (1 + asset.tpPct / 2);
+      } else {
+        stopLoss = entrada * (1 + asset.slPct);
+        takeProfit = entrada * (1 - asset.tpPct);
+        saida = entrada * (1 - asset.tpPct / 2);
+      }
+
+      document.getElementById('cfd-contrato').value = getContratoPadrao(symbol);
+      updateCFDLoteLegend(symbol);
+      document.getElementById('cfd-preco-entrada').value = roundToStep(entrada, asset.step);
+      document.getElementById('cfd-preco-saida').value = roundToStep(saida, asset.step);
+      document.getElementById('cfd-stop-loss').value = roundToStep(stopLoss, asset.step);
+      document.getElementById('cfd-take-profit').value = roundToStep(takeProfit, asset.step);
+      document.getElementById('cfd-preco-entrada').step = asset.step;
+      document.getElementById('cfd-preco-saida').step = asset.step;
+      document.getElementById('cfd-stop-loss').step = asset.step;
+      document.getElementById('cfd-take-profit').step = asset.step;
+    }
+
+    function formatUSDExact(value) {
+      const n = Number(value);
+      if (isNaN(n) || !isFinite(n)) return '$0.00';
+      const sign = n < 0 ? '-' : '';
+      return sign + '$' + Math.abs(n).toFixed(2);
+    }
+
+    function isInputBlank(elementId) {
+      const el = document.getElementById(elementId);
+      return !el || String(el.value).trim() === '';
+    }
+
+    /**
+     * Risco-Retorno — |Δ preço em US$| × mult × Contrato(s) × Volume
+     */
+    function calcularRiscoRetorno(precoEntrada, stopLoss, takeProfit, fatorPnL, direction, stopLossBlank) {
+      let riscoPotencial = 0;
+      let retornoPotencial = 0;
+
+      if (direction === 'long') {
+        riscoPotencial = Math.abs(precoEntrada - stopLoss) * fatorPnL;
+        retornoPotencial = Math.abs(takeProfit - precoEntrada) * fatorPnL;
+      } else {
+        riscoPotencial = Math.abs(stopLoss - precoEntrada) * fatorPnL;
+        retornoPotencial = Math.abs(precoEntrada - takeProfit) * fatorPnL;
+      }
+
+      riscoPotencial = Math.round(riscoPotencial * 100) / 100;
+      retornoPotencial = Math.round(retornoPotencial * 100) / 100;
+
+      let rrRatio = 'N/A';
+      let rrLabel = 'Risco vs retorno projetado';
+      let rrValid = false;
+
+      if (stopLossBlank || riscoPotencial === 0) {
+        rrRatio = '1 : 0.0';
+        rrLabel = 'Risco indefinido — informe um Stop Loss válido';
+      } else {
+        const proporcao = retornoPotencial / riscoPotencial;
+        if (!isFinite(proporcao)) {
+          rrRatio = 'N/A';
+          rrLabel = 'Proporção indisponível';
+        } else {
+          rrRatio = '1 : ' + proporcao.toFixed(1);
+          rrLabel = 'Risco-Retorno de ' + rrRatio;
+          rrValid = true;
+        }
+      }
+
+      return {
+        riscoPotencial: riscoPotencial,
+        retornoPotencial: retornoPotencial,
+        rrRatio: rrRatio,
+        rrLabel: rrLabel,
+        rrValid: rrValid
+      };
+    }
+
+    function updateLeverageDisplay(alavancagem) {
+      const wrap = document.getElementById('cfd-lev-wrap');
+      const display = document.getElementById('cfd-lev-display');
+      display.textContent = '1:' + alavancagem;
+      if (alavancagem >= 1000) {
+        wrap.classList.add('super-lev');
+      } else {
+        wrap.classList.remove('super-lev');
+      }
+    }
+
+    function calcularCFD() {
+      const symbol = document.getElementById('cfd-ativo').value;
+      const asset = getCFDAssetInfo(symbol);
+      const spec = getEspecificacaoCFD(symbol);
+
+      const volume = parseLocaleNumber(document.getElementById('cfd-lotes').value);
+      const contratos = parseLocaleNumber(document.getElementById('cfd-contrato').value);
+      const precoEntrada = parseLocaleNumber(document.getElementById('cfd-preco-entrada').value);
+      const precoSaida = parseLocaleNumber(document.getElementById('cfd-preco-saida').value);
+      const stopLoss = parseLocaleNumber(document.getElementById('cfd-stop-loss').value);
+      const takeProfit = parseLocaleNumber(document.getElementById('cfd-take-profit').value);
+      const alavancagem = parseInt(document.getElementById('cfd-alavancagem').value, 10) || 1;
+      const direction = state.cfdDirection;
+
+      updateLeverageDisplay(alavancagem);
+      document.getElementById('cfd-ativo-display').textContent = asset.label;
+
+      if (volume <= 0 || contratos <= 0 || precoEntrada <= 0) {
+        resetCFDResults();
+        return;
+      }
+
+      const mult = spec.mult;
+      const fatorPnL = calcularFatorPnL(symbol, contratos, volume);
+      const valorPorPonto = calcularValorPorPonto(symbol, contratos, volume);
+      const exposicaoTotal = precoEntrada * contratos * volume;
+      const margemRequerida = exposicaoTotal / alavancagem;
+
+      const diffPreco = direction === 'long'
+        ? (precoSaida - precoEntrada)
+        : (precoEntrada - precoSaida);
+      const pnl = diffPreco * fatorPnL;
+
+      const variacaoPercent = ((precoSaida - precoEntrada) / precoEntrada) * 100;
+
+      const stopLossBlank = isInputBlank('cfd-stop-loss');
+      const takeProfitBlank = isInputBlank('cfd-take-profit');
+
+      const rr = calcularRiscoRetorno(
+        precoEntrada, stopLoss, takeProfit, fatorPnL, direction, stopLossBlank
+      );
+
+      const formulaPnL = buildFormulaPnLLabel(symbol, contratos);
+      const formulaPonto = buildFormulaMultLabel(symbol, contratos, volume);
+      const pnlSubSuffix = METAL_SYMBOLS.indexOf(symbol) !== -1
+        ? ' (US$ 1,00 por onça)'
+        : (FOREX_SYMBOLS.indexOf(symbol) !== -1 || getMultiplicadorCFD(symbol) === 0.01
+          ? ' (escala centavos — 0,01)' : ' (US$ 1,00 de variação)');
+
+      document.getElementById('cfd-risco-sub').textContent = direction === 'long'
+        ? '|Entrada − SL| × (' + formulaPnL + ')' + pnlSubSuffix
+        : '|SL − Entrada| × (' + formulaPnL + ')' + pnlSubSuffix;
+      document.getElementById('cfd-retorno-sub').textContent = direction === 'long'
+        ? '|TP − Entrada| × (' + formulaPnL + ')' + pnlSubSuffix
+        : '|Entrada − TP| × (' + formulaPnL + ')' + pnlSubSuffix;
+
+      document.getElementById('cfd-risco').textContent = stopLossBlank
+        ? '—'
+        : formatUSDExact(rr.riscoPotencial);
+      setResultClass(document.getElementById('cfd-risco-container'), stopLossBlank ? 0 : -rr.riscoPotencial);
+
+      document.getElementById('cfd-retorno').textContent = takeProfitBlank
+        ? '—'
+        : formatUSDExact(rr.retornoPotencial);
+      setResultClass(document.getElementById('cfd-retorno-container'), takeProfitBlank ? 0 : rr.retornoPotencial);
+
+      document.getElementById('cfd-rr').textContent = rr.rrRatio;
+      document.getElementById('cfd-rr-sub').textContent = rr.rrLabel;
+
+      document.getElementById('cfd-exposicao').textContent = formatUSD(exposicaoTotal);
+
+      if (symbol === 'XAU/USD' || symbol === 'XAG/USD') {
+        document.getElementById('cfd-exposicao-sub').textContent =
+          formatNumber(contratos, 0) + ' oz × ' + formatNumber(volume, 2) + ' lote(s) × ' +
+          formatNumber(precoEntrada, symbol === 'XAG/USD' ? 3 : 4);
+      } else if (OIL_SYMBOLS.indexOf(symbol) !== -1) {
+        document.getElementById('cfd-exposicao-sub').textContent =
+          formatNumber(contratos, 0) + ' barris × ' + formatNumber(volume, 2) + ' lote(s) × ' +
+          formatNumber(precoEntrada, 2) + ' US$/bbl';
+      } else {
+        document.getElementById('cfd-exposicao-sub').textContent =
+          formatNumber(contratos, 0) + ' contr × ' + formatNumber(volume, 2) + ' vol × ' +
+          formatNumber(precoEntrada, asset.step < 1 ? 4 : 2);
+      }
+
+      document.getElementById('cfd-margem').textContent = formatUSD(margemRequerida);
+
+      document.getElementById('cfd-valor-ponto').textContent = formatUSDExact(valorPorPonto);
+      document.getElementById('cfd-valor-ponto-sub').textContent =
+        formulaPonto + ' = ' + formatUSDExact(valorPorPonto) + '/US$';
+
+      const variacaoEl = document.getElementById('cfd-variacao');
+      variacaoEl.textContent = (variacaoPercent >= 0 ? '+' : '') + formatPercent(variacaoPercent);
+      variacaoEl.style.color = variacaoPercent >= 0 ? 'var(--green)' : 'var(--red)';
+
+      const pnlContainer = document.getElementById('cfd-pnl-container');
+      document.getElementById('cfd-pnl').textContent = (pnl >= 0 ? '+' : '') + formatUSD(pnl);
+      document.getElementById('cfd-pnl-sub').textContent = direction === 'long'
+        ? 'Posição Comprada (Long) — ganha com alta'
+        : 'Posição Vendida (Short) — ganha com queda';
+
+      pnlContainer.classList.remove('positive', 'negative');
+      if (pnl > 0) pnlContainer.classList.add('positive');
+      else if (pnl < 0) pnlContainer.classList.add('negative');
+
+      state.cfdData = {
+        valid: true,
+        symbol: symbol,
+        ativo: asset.label,
+        segment: asset.segment,
+        assetStep: asset.step,
+        direction: direction,
+        volume: volume,
+        contratos: contratos,
+        mult: mult,
+        fatorPnL: fatorPnL,
+        alavancagem: alavancagem,
+        precoEntrada: precoEntrada,
+        precoSaida: precoSaida,
+        stopLoss: stopLoss,
+        takeProfit: takeProfit,
+        exposicaoTotal: exposicaoTotal,
+        margemRequerida: margemRequerida,
+        valorPorPonto: valorPorPonto,
+        riscoPotencial: rr.riscoPotencial,
+        retornoPotencial: rr.retornoPotencial,
+        rrRatio: rr.rrRatio,
+        rrLabel: rr.rrLabel,
+        rrValid: rr.rrValid,
+        pnl: pnl,
+        variacaoPercent: variacaoPercent
+      };
+
+      updateCFDOperationSummary(state.cfdData);
+    }
+
+    function resetCFDResults() {
+      [
+        'cfd-risco', 'cfd-retorno', 'cfd-rr', 'cfd-exposicao', 'cfd-margem',
+        'cfd-valor-ponto', 'cfd-variacao', 'cfd-pnl', 'cfd-ativo-display'
+      ].forEach(function(id) {
+        document.getElementById(id).textContent = '—';
+      });
+      document.getElementById('cfd-exposicao-sub').textContent = '';
+      document.getElementById('cfd-pnl-sub').textContent = '';
+      document.getElementById('cfd-rr-sub').textContent = 'Risco vs retorno projetado';
+      document.getElementById('cfd-risco-sub').textContent = 'Entrada → Stop Loss × volume';
+      document.getElementById('cfd-retorno-sub').textContent = 'Entrada → Take Profit × volume';
+      document.getElementById('cfd-valor-ponto-sub').textContent = 'Por 1 ponto inteiro de variação';
+      document.getElementById('cfd-risco-container').classList.remove('positive', 'negative');
+      document.getElementById('cfd-retorno-container').classList.remove('positive', 'negative');
+      document.getElementById('cfd-pnl-container').classList.remove('positive', 'negative');
+      state.cfdData = { valid: false };
+      updateCFDOperationSummary(null);
+    }
+
+    /* ============================================================
+       HISTÓRICO — LOCALSTORAGE
+    ============================================================ */
+    function loadHistory() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        state.history = raw ? JSON.parse(raw) : [];
+        if (!Array.isArray(state.history)) state.history = [];
+      } catch (e) {
+        state.history = [];
+      }
+      renderHistoryTable();
+    }
+
+    function persistHistory() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state.history));
+    }
+
+    function saveCurrentSimulation() {
+      const note = document.getElementById('history-note').value.trim();
+      const timestamp = new Date().toISOString();
+      let entry = null;
+
+      if (state.activeTab === 'renda-fixa') {
+        if (state.rfMarket === 'br') {
+          if (!state.brData.valid) {
+            showToast('Preencha os parâmetros do Mercado Brasil antes de salvar.');
+            return;
+          }
+          const d = state.brData;
+          let taxaLabel;
+          if (d.indexadorKey === 'cdi') {
+            taxaLabel = formatPercent(d.taxaInput, 0) + ' do CDI';
+          } else if (d.inflacaoProjetada != null) {
+            taxaLabel = formatPercent(d.taxaEfetiva) + ' a.a. (' + formatPercent(d.taxaInput) + ' real + ' +
+              formatPercent(d.inflacaoProjetada) + ' infl.)';
+          } else {
+            taxaLabel = formatPercent(d.taxaEfetiva) + ' a.a.';
+          }
+
+          entry = {
+            id: generateId(),
+            timestamp: timestamp,
+            tipoAtivo: '🇧🇷 ' + d.indexador + ' (' + taxaLabel + ')',
+            prazo: formatNumber(d.anos, Number.isInteger(d.anos) ? 0 : 2) + ' anos',
+            rentabilidadeBruta: d.rendimentoBruto,
+            rentabilidadeBrutaFmt: formatBRL(d.rendimentoBruto),
+            imposto: d.ir,
+            impostoFmt: formatBRL(d.ir),
+            liquidoFinal: d.liquido,
+            liquidoFinalFmt: formatBRL(d.liquido),
+            nota: note
+          };
+        } else {
+          if (!state.usData.valid) {
+            showToast('Preencha os parâmetros do Mercado EUA antes de salvar.');
+            return;
+          }
+          const d = state.usData;
+          entry = {
+            id: generateId(),
+            timestamp: timestamp,
+            tipoAtivo: '🇺🇸 ' + d.tbond + ' · FX R$' + formatNumber(d.cambioEntrada, 2) + '→' + formatNumber(d.cambioSaida, 2),
+            prazo: d.anos + ' anos',
+            rentabilidadeBruta: d.lucroTotalBRL,
+            rentabilidadeBrutaFmt: formatBRL(d.lucroTotalBRL) + ' (USD: ' + formatUSD(d.ganhoNominalUSD) + ' · Cambial: ' + formatBRL(d.ganhoCambialExtra) + ')',
+            imposto: d.ir,
+            impostoFmt: formatBRL(d.ir),
+            liquidoFinal: d.liquido,
+            liquidoFinalFmt: formatBRL(d.liquido),
+            nota: note
+          };
+        }
+      } else if (state.activeTab === 'cfd') {
+        if (!state.cfdData.valid) {
+          showToast('Preencha os parâmetros de CFD antes de salvar.');
+          return;
+        }
+        const d = state.cfdData;
+        const isShort = d.direction === 'short';
+        const dirLabel = isShort ? 'Venda (Short)' : 'Compra (Long)';
+        const rrInfo = d.rrLabel ? d.rrLabel : (d.rrRatio || '—');
+        const resumoOperacao = buildCFDOperationSummary(d);
+        const notaFinal = note
+          ? note + '\n\n---\n' + resumoOperacao
+          : resumoOperacao;
+
+        entry = {
+          id: generateId(),
+          timestamp: timestamp,
+          tipoAtivo: d.ativo + ' · ' + d.segment + ' · ' + dirLabel + ' · 1:' + d.alavancagem + ' · Pip ' + formatUSD(d.valorPorPonto) + ' · ' + rrInfo,
+          prazo: isShort
+            ? 'Short · SL acima · TP abaixo · Lucro na queda'
+            : 'Long · SL abaixo · TP acima · Lucro na alta',
+          rentabilidadeBruta: d.retornoPotencial > 0 ? d.retornoPotencial : d.pnl,
+          rentabilidadeBrutaFmt: (d.rrValid
+            ? 'Risco: ' + formatUSD(d.riscoPotencial) + ' · Retorno: ' + formatUSD(d.retornoPotencial) + ' · Pip: ' + formatUSD(d.valorPorPonto)
+            : (d.pnl >= 0 ? '+' : '') + formatUSD(d.pnl)),
+          imposto: 0,
+          impostoFmt: '—',
+          liquidoFinal: d.pnl,
+          liquidoFinalFmt: (d.pnl >= 0 ? '+' : '') + formatUSD(d.pnl) + (d.rrRatio ? ' · R:R ' + d.rrRatio : ''),
+          nota: notaFinal,
+          resumoOperacao: resumoOperacao
+        };
+      }
+
+      if (!entry) return;
+
+      state.history.unshift(entry);
+      persistHistory();
+      renderHistoryTable();
+      document.getElementById('history-note').value = '';
+      showToast('Simulação salva com sucesso!');
+    }
+
+    function deleteHistoryEntry(id) {
+      state.history = state.history.filter(function(e) { return e.id !== id; });
+      persistHistory();
+      renderHistoryTable();
+    }
+
+    function clearHistory() {
+      if (state.history.length === 0) return;
+      if (!confirm('Deseja apagar todo o histórico de simulações? Esta ação não pode ser desfeita.')) return;
+      state.history = [];
+      persistHistory();
+      renderHistoryTable();
+      showToast('Histórico limpo.');
+    }
+
+    function renderHistoryTable() {
+      const tbody = document.getElementById('history-tbody');
+
+      if (state.history.length === 0) {
+        tbody.innerHTML =
+          '<tr class="table-empty-row"><td colspan="9">' +
+          '<div class="table-empty"><span>📋</span>' +
+          'Nenhuma simulação salva ainda. Execute um cálculo e clique em "Salvar e Anotar Simulação".' +
+          '</div></td></tr>';
+        return;
+      }
+
+      let html = '';
+      state.history.forEach(function(entry, index) {
+        const brutaClass = entry.rentabilidadeBruta >= 0 ? 'cell-positive' : 'cell-negative';
+        const liquidoClass = entry.liquidoFinal >= 0 ? 'cell-positive' : 'cell-negative';
+
+        html += '<tr>';
+        html += '<td class="cell-mono">' + (index + 1) + '</td>';
+        html += '<td class="cell-date">' + formatDateTime(entry.timestamp) + '</td>';
+        html += '<td>' + escapeHtml(entry.tipoAtivo) + '</td>';
+        html += '<td class="cell-mono">' + escapeHtml(entry.prazo) + '</td>';
+        html += '<td class="cell-mono ' + brutaClass + '">' + entry.rentabilidadeBrutaFmt + '</td>';
+        html += '<td class="cell-mono">' + entry.impostoFmt + '</td>';
+        html += '<td class="cell-mono ' + liquidoClass + '">' + entry.liquidoFinalFmt + '</td>';
+        html += '<td class="cell-note" title="' + escapeHtml(entry.nota || '') + '">' + escapeHtml(entry.nota || '—') + '</td>';
+        html += '<td><button type="button" class="btn-row-delete" data-delete="' + entry.id + '" title="Remover">✕</button></td>';
+        html += '</tr>';
+      });
+
+      tbody.innerHTML = html;
+      tbody.querySelectorAll('[data-delete]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          deleteHistoryEntry(btn.getAttribute('data-delete'));
+        });
+      });
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    /* ============================================================
+       UI — NAVEGAÇÃO E EVENTOS
+    ============================================================ */
+    function initMainTabs() {
+      document.querySelectorAll('.tab-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          const tabId = btn.getAttribute('data-tab');
+          document.querySelectorAll('.tab-btn').forEach(function(b) {
+            b.classList.remove('active');
+            b.setAttribute('aria-selected', 'false');
+          });
+          btn.classList.add('active');
+          btn.setAttribute('aria-selected', 'true');
+          document.querySelectorAll('#panel-renda-fixa, #panel-cfd').forEach(function(p) {
+            p.classList.remove('active');
+          });
+          document.getElementById('panel-' + tabId).classList.add('active');
+          state.activeTab = tabId;
+        });
+      });
+    }
+
+    function initMarketSwitch() {
+      document.querySelectorAll('.market-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          const market = btn.getAttribute('data-market');
+          document.querySelectorAll('.market-btn').forEach(function(b) {
+            b.classList.remove('active');
+            b.setAttribute('aria-selected', 'false');
+          });
+          btn.classList.add('active');
+          btn.setAttribute('aria-selected', 'true');
+          document.querySelectorAll('.market-panel').forEach(function(p) {
+            p.classList.remove('active');
+          });
+          document.getElementById('market-panel-' + market).classList.add('active');
+          state.rfMarket = market;
+        });
+      });
+    }
+
+    function initCFDDirection() {
+      document.querySelectorAll('.direction-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          document.querySelectorAll('.direction-btn').forEach(function(b) {
+            b.classList.remove('active');
+          });
+          btn.classList.add('active');
+          state.cfdDirection = btn.getAttribute('data-direction');
+          applyCFDAssetDefaults();
+          calcularCFD();
+        });
+      });
+    }
+
+    function initCFDAssetSelect() {
+      document.getElementById('cfd-ativo').addEventListener('change', function() {
+        applyCFDAssetDefaults();
+        calcularCFD();
+      });
+    }
+
+    function initEventListeners() {
+      const brInputs = ['br-valor', 'br-anos', 'br-indexador', 'br-taxa'];
+      brInputs.forEach(function(id) {
+        const el = document.getElementById(id);
+        el.addEventListener('input', function() {
+          if (id === 'br-indexador') updateBrasilLabels();
+          calcularBrasil();
+        });
+        el.addEventListener('change', function() {
+          if (id === 'br-indexador') updateBrasilLabels();
+          calcularBrasil();
+        });
+      });
+
+      const usInputs = ['us-valor', 'us-tbond', 'us-cambio-entrada', 'us-cambio-saida'];
+      usInputs.forEach(function(id) {
+        const el = document.getElementById(id);
+        el.addEventListener('input', function() {
+          if (id === 'us-tbond') updateTBondDisplay();
+          calcularEUA();
+        });
+        el.addEventListener('change', function() {
+          if (id === 'us-tbond') updateTBondDisplay();
+          calcularEUA();
+        });
+      });
+
+      const cfdInputs = [
+        'cfd-contrato', 'cfd-lotes',
+        'cfd-preco-entrada', 'cfd-preco-saida',
+        'cfd-stop-loss', 'cfd-take-profit', 'cfd-alavancagem'
+      ];
+      cfdInputs.forEach(function(id) {
+        const el = document.getElementById(id);
+        el.addEventListener('input', calcularCFD);
+        el.addEventListener('change', calcularCFD);
+      });
+
+      document.getElementById('btn-save-simulation').addEventListener('click', saveCurrentSimulation);
+      document.getElementById('btn-clear-history').addEventListener('click', clearHistory);
+    }
+
+    function init() {
+      initMainTabs();
+      initMarketSwitch();
+      initCFDDirection();
+      initCFDAssetSelect();
+      initEventListeners();
+      updateBrasilLabels();
+      updateTBondDisplay();
+      loadHistory();
+      applyCFDAssetDefaults();
+      calcularBrasil();
+      calcularEUA();
+      calcularCFD();
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>
