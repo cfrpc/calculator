@@ -2,11 +2,18 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="description" content="Simuladores educacionais de Renda Fixa (Brasil e EUA) e CFD — ferramentas analíticas para aprendizado financeiro.">
+  <meta name="theme-color" content="#0b0e11">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Capital Finance">
   <title>Capital Finance | Educação CFD & Renda Fixa</title>
+  <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/svg+xml" href="logo.svg">
-  <link rel="apple-touch-icon" href="logo.svg">
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -852,6 +859,112 @@
       font-size: 11px;
       color: var(--text-muted);
     }
+
+    /* PWA — instalar app */
+    .pwa-install-bar {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 14px;
+      margin-bottom: 20px;
+      animation: fadeIn 0.35s ease;
+    }
+
+    .pwa-install-bar.visible { display: flex; }
+
+    .pwa-install-copy {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .pwa-install-copy img {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      flex-shrink: 0;
+    }
+
+    .pwa-install-copy strong {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .pwa-install-copy span {
+      display: block;
+      font-size: 11px;
+      color: var(--text-secondary);
+      line-height: 1.4;
+    }
+
+    .pwa-install-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .btn-install {
+      background: var(--accent);
+      color: #0b0e11;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 10px 14px;
+      cursor: pointer;
+      transition: var(--transition);
+      white-space: nowrap;
+    }
+
+    .btn-install:hover { background: var(--accent-hover); }
+
+    .btn-install-dismiss {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 18px;
+      line-height: 1;
+      cursor: pointer;
+      padding: 6px;
+      border-radius: 4px;
+    }
+
+    .btn-install-dismiss:hover {
+      color: var(--text-primary);
+      background: var(--bg-secondary);
+    }
+
+    .pwa-ios-hint {
+      display: none;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      margin-bottom: 20px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.55;
+      animation: fadeIn 0.35s ease;
+    }
+
+    .pwa-ios-hint.visible { display: block; }
+
+    .pwa-ios-hint strong { color: var(--text-primary); }
+
+    @media (display-mode: standalone) {
+      .pwa-install-bar,
+      .pwa-ios-hint { display: none !important; }
+    }
   </style>
 </head>
 <body>
@@ -862,6 +975,27 @@
       <h1>Capital <span>Finance</span></h1>
       <p>Simule Renda Fixa por mercado (Brasil ou EUA) e opere cenários CFD. Plataforma educacional independente para análise e estudo.</p>
     </header>
+
+    <div class="pwa-install-bar" id="pwa-install-bar" role="region" aria-label="Instalar aplicativo">
+      <div class="pwa-install-copy">
+        <img src="icons/icon-192.png" alt="" width="40" height="40">
+        <div>
+          <strong>Instalar Capital Finance</strong>
+          <span>Baixe no celular e use offline, como um app.</span>
+        </div>
+      </div>
+      <div class="pwa-install-actions">
+        <button type="button" class="btn-install" id="btn-pwa-install">Instalar</button>
+        <button type="button" class="btn-install-dismiss" id="btn-pwa-dismiss" aria-label="Fechar">×</button>
+      </div>
+    </div>
+
+    <div class="pwa-ios-hint" id="pwa-ios-hint">
+      <strong>Instalar no iPhone:</strong> toque em Compartilhar
+      <span aria-hidden="true"> ⎋ </span>
+      e depois em <strong>Adicionar à Tela de Início</strong>. Assim a calculadora fica disponível como app.
+      <button type="button" class="btn-install-dismiss" id="btn-ios-dismiss" aria-label="Fechar" style="float:right;margin-top:-2px;">×</button>
+    </div>
 
     <div class="disclaimer">
       <strong>Aviso:</strong> Esta ferramenta possui caráter exclusivamente educacional e informativo. Não constitui recomendação de investimento, consultoria financeira ou oferta de produtos. Resultados são simulações e podem divergir da realidade. Consulte um profissional qualificado antes de tomar decisões financeiras.
@@ -2428,12 +2562,110 @@
       document.getElementById('btn-clear-history').addEventListener('click', clearHistory);
     }
 
+    /* ============================================================
+       PWA — instalação e service worker
+    ============================================================ */
+    const PWA_DISMISS_KEY = 'cf_pwa_install_dismissed';
+    let deferredInstallPrompt = null;
+
+    function isStandaloneDisplay() {
+      return window.matchMedia('(display-mode: standalone)').matches ||
+        window.navigator.standalone === true;
+    }
+
+    function isIosSafari() {
+      const ua = window.navigator.userAgent;
+      const isIos = /iPad|iPhone|iPod/.test(ua) ||
+        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      const isSafari = /Safari/.test(ua) && !/CriOS|FxiOS|EdgiOS|OPiOS/.test(ua);
+      return isIos && isSafari;
+    }
+
+    function wasInstallDismissed() {
+      try {
+        return localStorage.getItem(PWA_DISMISS_KEY) === '1';
+      } catch (e) {
+        return false;
+      }
+    }
+
+    function dismissInstallUi() {
+      try { localStorage.setItem(PWA_DISMISS_KEY, '1'); } catch (e) { /* ignore */ }
+      const bar = document.getElementById('pwa-install-bar');
+      const ios = document.getElementById('pwa-ios-hint');
+      if (bar) bar.classList.remove('visible');
+      if (ios) ios.classList.remove('visible');
+    }
+
+    function showInstallBar() {
+      if (isStandaloneDisplay() || wasInstallDismissed()) return;
+      const bar = document.getElementById('pwa-install-bar');
+      if (bar) bar.classList.add('visible');
+    }
+
+    function showIosHint() {
+      if (isStandaloneDisplay() || wasInstallDismissed()) return;
+      if (!isIosSafari()) return;
+      const ios = document.getElementById('pwa-ios-hint');
+      if (ios) ios.classList.add('visible');
+    }
+
+    function initPwaInstall() {
+      const installBtn = document.getElementById('btn-pwa-install');
+      const dismissBtn = document.getElementById('btn-pwa-dismiss');
+      const iosDismiss = document.getElementById('btn-ios-dismiss');
+
+      window.addEventListener('beforeinstallprompt', function (e) {
+        e.preventDefault();
+        deferredInstallPrompt = e;
+        showInstallBar();
+      });
+
+      window.addEventListener('appinstalled', function () {
+        deferredInstallPrompt = null;
+        dismissInstallUi();
+        showToast('App instalado com sucesso!');
+      });
+
+      if (installBtn) {
+        installBtn.addEventListener('click', async function () {
+          if (!deferredInstallPrompt) {
+            showToast('Use o menu do navegador → Instalar app');
+            return;
+          }
+          deferredInstallPrompt.prompt();
+          try {
+            const choice = await deferredInstallPrompt.userChoice;
+            if (choice && choice.outcome === 'accepted') {
+              dismissInstallUi();
+            }
+          } catch (err) { /* ignore */ }
+          deferredInstallPrompt = null;
+        });
+      }
+
+      if (dismissBtn) dismissBtn.addEventListener('click', dismissInstallUi);
+      if (iosDismiss) iosDismiss.addEventListener('click', dismissInstallUi);
+
+      showIosHint();
+    }
+
+    function registerServiceWorker() {
+      if (!('serviceWorker' in navigator)) return;
+      window.addEventListener('load', function () {
+        navigator.serviceWorker.register('./sw.js').catch(function (err) {
+          console.warn('Service Worker não registrado:', err);
+        });
+      });
+    }
+
     function init() {
       initMainTabs();
       initMarketSwitch();
       initCFDDirection();
       initCFDAssetSelect();
       initEventListeners();
+      initPwaInstall();
       updateBrasilLabels();
       updateTBondDisplay();
       loadHistory();
@@ -2443,6 +2675,7 @@
       calcularCFD();
     }
 
+    registerServiceWorker();
     document.addEventListener('DOMContentLoaded', init);
   </script>
 </body>
