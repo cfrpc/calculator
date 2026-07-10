@@ -862,19 +862,20 @@
 
     /* PWA — instalar app */
     .pwa-install-bar {
-      display: none;
+      display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 12px;
       background: var(--bg-card);
-      border: 1px solid var(--border);
+      border: 1px solid var(--accent);
       border-radius: var(--radius);
       padding: 12px 14px;
       margin-bottom: 20px;
       animation: fadeIn 0.35s ease;
+      box-shadow: 0 0 0 1px var(--accent-dim);
     }
 
-    .pwa-install-bar.visible { display: flex; }
+    .pwa-install-bar.hidden { display: none; }
 
     .pwa-install-copy {
       display: flex;
@@ -958,6 +959,7 @@
     }
 
     .pwa-ios-hint.visible { display: block; }
+    .pwa-ios-hint.hidden { display: none !important; }
 
     .pwa-ios-hint strong { color: var(--text-primary); }
 
@@ -981,11 +983,11 @@
         <img src="icons/icon-192.png" alt="" width="40" height="40">
         <div>
           <strong>Instalar Capital Finance</strong>
-          <span>Baixe no celular e use offline, como um app.</span>
+          <span id="pwa-install-hint">Toque em Instalar para baixar o app e usar offline.</span>
         </div>
       </div>
       <div class="pwa-install-actions">
-        <button type="button" class="btn-install" id="btn-pwa-install">Instalar</button>
+        <button type="button" class="btn-install" id="btn-pwa-install">Instalar app</button>
         <button type="button" class="btn-install-dismiss" id="btn-pwa-dismiss" aria-label="Fechar">×</button>
       </div>
     </div>
@@ -2581,6 +2583,10 @@
       return isIos && isSafari;
     }
 
+    function isAndroid() {
+      return /Android/i.test(window.navigator.userAgent);
+    }
+
     function wasInstallDismissed() {
       try {
         return localStorage.getItem(PWA_DISMISS_KEY) === '1';
@@ -2593,27 +2599,53 @@
       try { localStorage.setItem(PWA_DISMISS_KEY, '1'); } catch (e) { /* ignore */ }
       const bar = document.getElementById('pwa-install-bar');
       const ios = document.getElementById('pwa-ios-hint');
-      if (bar) bar.classList.remove('visible');
-      if (ios) ios.classList.remove('visible');
+      if (bar) bar.classList.add('hidden');
+      if (ios) {
+        ios.classList.remove('visible');
+        ios.classList.add('hidden');
+      }
+    }
+
+    function updateInstallHint() {
+      const hint = document.getElementById('pwa-install-hint');
+      if (!hint) return;
+      if (isIosSafari()) {
+        hint.textContent = 'No iPhone: toque em Compartilhar → Adicionar à Tela de Início.';
+      } else if (isAndroid()) {
+        hint.textContent = 'Toque em Instalar app para baixar e usar offline.';
+      } else {
+        hint.textContent = 'No computador: menu ⋮ do navegador → Instalar Capital Finance (ou ícone ⊕ na barra de endereço).';
+      }
     }
 
     function showInstallBar() {
-      if (isStandaloneDisplay() || wasInstallDismissed()) return;
+      if (isStandaloneDisplay() || wasInstallDismissed()) {
+        const bar = document.getElementById('pwa-install-bar');
+        if (bar) bar.classList.add('hidden');
+        return;
+      }
       const bar = document.getElementById('pwa-install-bar');
-      if (bar) bar.classList.add('visible');
+      if (bar) bar.classList.remove('hidden');
+      updateInstallHint();
     }
 
     function showIosHint() {
       if (isStandaloneDisplay() || wasInstallDismissed()) return;
       if (!isIosSafari()) return;
       const ios = document.getElementById('pwa-ios-hint');
-      if (ios) ios.classList.add('visible');
+      if (ios) {
+        ios.classList.remove('hidden');
+        ios.classList.add('visible');
+      }
     }
 
     function initPwaInstall() {
       const installBtn = document.getElementById('btn-pwa-install');
       const dismissBtn = document.getElementById('btn-pwa-dismiss');
       const iosDismiss = document.getElementById('btn-ios-dismiss');
+
+      showInstallBar();
+      showIosHint();
 
       window.addEventListener('beforeinstallprompt', function (e) {
         e.preventDefault();
@@ -2629,33 +2661,36 @@
 
       if (installBtn) {
         installBtn.addEventListener('click', async function () {
-          if (!deferredInstallPrompt) {
-            showToast('Use o menu do navegador → Instalar app');
+          if (deferredInstallPrompt) {
+            deferredInstallPrompt.prompt();
+            try {
+              const choice = await deferredInstallPrompt.userChoice;
+              if (choice && choice.outcome === 'accepted') {
+                dismissInstallUi();
+              }
+            } catch (err) { /* ignore */ }
+            deferredInstallPrompt = null;
             return;
           }
-          deferredInstallPrompt.prompt();
-          try {
-            const choice = await deferredInstallPrompt.userChoice;
-            if (choice && choice.outcome === 'accepted') {
-              dismissInstallUi();
-            }
-          } catch (err) { /* ignore */ }
-          deferredInstallPrompt = null;
+
+          if (isIosSafari()) {
+            showIosHint();
+            showToast('No iPhone: Compartilhar → Adicionar à Tela de Início');
+            return;
+          }
+
+          showToast('Abra o menu ⋮ do navegador e toque em Instalar app / Instalar Capital Finance');
         });
       }
 
       if (dismissBtn) dismissBtn.addEventListener('click', dismissInstallUi);
       if (iosDismiss) iosDismiss.addEventListener('click', dismissInstallUi);
-
-      showIosHint();
     }
 
     function registerServiceWorker() {
       if (!('serviceWorker' in navigator)) return;
-      window.addEventListener('load', function () {
-        navigator.serviceWorker.register('./sw.js').catch(function (err) {
-          console.warn('Service Worker não registrado:', err);
-        });
+      navigator.serviceWorker.register('./sw.js').catch(function (err) {
+        console.warn('Service Worker não registrado:', err);
       });
     }
 
@@ -2676,7 +2711,11 @@
     }
 
     registerServiceWorker();
-    document.addEventListener('DOMContentLoaded', init);
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
   </script>
 </body>
 </html>
