@@ -1,5 +1,5 @@
 /* Capital Finance — Service Worker (PWA offline) */
-const CACHE_VERSION = 'cf-v2';
+const CACHE_VERSION = 'cf-v3';
 const CACHE_NAME = 'capital-finance-' + CACHE_VERSION;
 
 const PRECACHE_URLS = [
@@ -40,13 +40,18 @@ self.addEventListener('activate', function (event) {
   );
 });
 
+function isHtmlRequest(request) {
+  if (request.mode === 'navigate') return true;
+  const accept = request.headers.get('accept') || '';
+  return accept.includes('text/html');
+}
+
 self.addEventListener('fetch', function (event) {
   const request = event.request;
   if (request.method !== 'GET') return;
 
   const url = new URL(request.url);
 
-  // Não cachear fontes externas de forma agressiva — network first com fallback
   if (url.origin !== self.location.origin) {
     event.respondWith(
       fetch(request).catch(function () {
@@ -56,7 +61,27 @@ self.addEventListener('fetch', function (event) {
     return;
   }
 
-  // App shell: cache first, atualiza em background
+  // HTML: network first (para atualizações aparecerem rápido)
+  if (isHtmlRequest(request) || url.pathname.endsWith('/sw.js') || url.pathname.endsWith('/manifest.json')) {
+    event.respondWith(
+      fetch(request).then(function (response) {
+        if (response && response.status === 200) {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then(function (cache) {
+            cache.put(request, clone);
+          });
+        }
+        return response;
+      }).catch(function () {
+        return caches.match(request).then(function (cached) {
+          return cached || caches.match('./index.html');
+        });
+      })
+    );
+    return;
+  }
+
+  // Assets: cache first
   event.respondWith(
     caches.match(request).then(function (cached) {
       const networkFetch = fetch(request).then(function (response) {
