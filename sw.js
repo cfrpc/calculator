@@ -1,5 +1,5 @@
 /* Capital Finance — Service Worker (PWA offline) */
-const CACHE_VERSION = 'cf-v3';
+const CACHE_VERSION = 'cf-v4';
 const CACHE_NAME = 'capital-finance-' + CACHE_VERSION;
 
 const PRECACHE_URLS = [

@@ -1063,7 +1063,7 @@
             </div>
           </div>
           <p class="field-hint" id="br-taxa-hint">
-            Informe <strong>100</strong> para 100% do CDI e defina o prazo em anos. Taxa CDI de referência: <span id="br-cdi-ref">14,15</span>% a.a.
+            Informe <strong>100</strong> para 100% do CDI e defina o prazo em anos. Taxa CDI de referência: <span id="br-cdi-ref">13,90</span>% a.a.
             Juros compostos anuais. IR regressivo sobre o rendimento bruto.
           </p>
           <div class="results">
@@ -1402,7 +1402,8 @@
     /* ============================================================
        CONSTANTES
     ============================================================ */
-    const CDI_TAXA_REFERENCIA = 14.15;
+    const CDI_TAXA_REFERENCIA = 13.90;
+    const SELIC_TAXA_REFERENCIA = 14;
 
     /** Inflação projetada (IPCA+) — somada à taxa real digitada pelo usuário */
     const INFLACAO_PROJETADA = 4.5;
@@ -1724,10 +1725,12 @@
         }
       } else if (ativo === 'selic') {
         setBrasilCampoTravado(prazoEl, false);
-        taxaEl.placeholder = 'Ex: 14,25';
+        taxaEl.value = SELIC_TAXA_REFERENCIA;
+        taxaEl.placeholder = 'Ex: ' + formatNumber(SELIC_TAXA_REFERENCIA, 0);
         label.textContent = 'Taxa Selic Meta (% a.a.)';
         suffix.textContent = '% a.a.';
-        hint.innerHTML = 'Informe taxa e prazo livremente. Taxa efetiva = valor digitado. IR regressivo conforme o prazo.';
+        hint.innerHTML = 'Referência: <strong>' + formatNumber(SELIC_TAXA_REFERENCIA, 0) +
+          '% a.a.</strong> Informe taxa e prazo livremente. Taxa efetiva = valor digitado. IR regressivo conforme o prazo.';
       } else {
         setBrasilCampoTravado(prazoEl, false);
         taxaEl.placeholder = 'Ex: 100';
